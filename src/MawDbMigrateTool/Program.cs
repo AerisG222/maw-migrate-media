@@ -1,4 +1,7 @@
-﻿using MawDbMigrateTool;
+﻿using Dapper;
+using MawDbMigrateTool;
+
+[module:DapperAot]
 
 if (args.Length != 3)
 {
