@@ -1,3 +1,4 @@
+using System.Data;
 using Dapper;
 using Npgsql;
 using MawDbMigrateTool.Models;
@@ -19,7 +20,7 @@ public class DbReader
 
         using var conn = new NpgsqlConnection(_dbConnString);
         await conn.OpenAsync();
-        var tran = await conn.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
+        var tran = await conn.BeginTransactionAsync(IsolationLevel.Serializable);
 
         db.Roles = await LoadTable<Role>("maw.role", conn);
         db.Users = await LoadTable<User>("maw.users", conn);
