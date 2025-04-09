@@ -3,7 +3,7 @@ using MawDbMigrateTool;
 
 [module:DapperAot]
 
-if (args.Length != 3)
+if (args.Length != 2)
 {
     ShowUsage();
     Environment.Exit(1);

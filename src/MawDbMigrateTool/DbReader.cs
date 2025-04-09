@@ -23,7 +23,7 @@ public class DbReader
         var tran = await conn.BeginTransactionAsync(IsolationLevel.Serializable);
 
         db.Roles = await LoadTable<Role>("maw.role", conn);
-        db.Users = await LoadTable<User>("maw.users", conn);
+        db.Users = await LoadTable<User>("maw.user", conn);
         db.UserRoles = await LoadTable<UserRole>("maw.user_role", conn);
 
         db.PhotoCategories = await LoadTable<PhotoCategory>("photo.category", conn);
@@ -52,6 +52,13 @@ public class DbReader
 
     public async Task<IEnumerable<T>> LoadTable<T>(string tableName, NpgsqlConnection conn)
     {
-        return (await conn.QueryAsync<T>("SELECT * FROM " + tableName)).ToList();
+        Console.WriteLine($"- reading: {tableName}");
+
+        var results = (await conn.QueryAsync<T>("SELECT * FROM " + tableName))
+            .ToList();
+
+        Console.WriteLine($"  - found: {results.Count} rows");
+
+        return results;
     }
 }
