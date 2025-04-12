@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug MawDbMigrateTool",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/src/MawDbMigrateTool/bin/Debug/net9.0/MawDbMigrateTool",
+            "args": [
+                "${env:MAW_API_Environment__DbConnectionString}",
+                "${workspaceFolder}/migrate.sql"
+            ],
+            "cwd": "${workspaceFolder}/src/MawDbMigrateTool",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        }
+    ]
+}
