@@ -1,8 +1,8 @@
-namespace MawDbMigrateTool.Models;
+namespace MawDbMigrateTool.Models.Source;
 
-public class PhotoReverseGeocode
+public class VideoReverseGeocode
 {
-    public int PhotoId { get; set; }
+    public int VideoId { get; set; }
     public string FormattedAddress { get; set; }
     public string AdministrativeAreaLevel1 { get; set; }
     public string AdministrativeAreaLevel2 { get; set; }

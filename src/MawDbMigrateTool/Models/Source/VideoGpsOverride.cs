@@ -1,8 +1,8 @@
-namespace MawDbMigrateTool.Models;
+namespace MawDbMigrateTool.Models.Source;
 
-public class PhotoGpsOverride
+public class VideoGpsOverride
 {
-    public int PhotoId { get; set; }
+    public int VideoId { get; set; }
     public double Latitude { get; set; }
     public double Longitude { get; set; }
     public short UserId { get; set; }

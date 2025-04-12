@@ -1,7 +1,7 @@
 using System.Data;
 using Dapper;
 using Npgsql;
-using MawDbMigrateTool.Models;
+using MawDbMigrateTool.Models.Source;
 
 namespace MawDbMigrateTool;
 

@@ -1,8 +1,8 @@
-namespace MawDbMigrateTool.Models;
+namespace MawDbMigrateTool.Models.Source;
 
-public class PhotoPointOfInterest
+public class VideoPointOfInterest
 {
-    public int PhotoId { get; set; }
+    public int VideoId { get; set; }
     public string PoiType { get; set; }
     public string PoiName { get; set; }
     public bool IsOverride { get; set; }

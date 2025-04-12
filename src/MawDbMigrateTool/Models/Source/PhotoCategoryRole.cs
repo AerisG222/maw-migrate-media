@@ -1,4 +1,4 @@
-namespace MawDbMigrateTool.Models;
+namespace MawDbMigrateTool.Models.Source;
 
 public class PhotoCategoryRole
 {
