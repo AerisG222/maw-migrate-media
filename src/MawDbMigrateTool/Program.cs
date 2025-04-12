@@ -2,6 +2,7 @@
 using MawDbMigrateTool;
 
 [module:DapperAot]
+DefaultTypeMap.MatchNamesWithUnderscores = true;
 
 if (args.Length != 2)
 {
