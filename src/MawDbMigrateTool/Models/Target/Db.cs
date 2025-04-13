@@ -11,4 +11,6 @@ public class Db
     public List<Media> Media { get; } = [];
     public List<Comment> Comments { get; } = [];
     public List<Rating> Ratings { get; } = [];
+    public List<Location> Locations { get; } = [];
+    public List<PointOfInterest> PointsOfInterest { get; } = [];
 }

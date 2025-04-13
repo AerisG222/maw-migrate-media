@@ -9,9 +9,9 @@ public class TargetBuilder
     readonly Dictionary<short, Guid> _userIdMap = [];
     readonly Dictionary<short, Guid> _roleIdMap = [];
     readonly Dictionary<short, Guid> _photoCategoryIdMap = [];
-    readonly Dictionary<int, Guid> _photoIdMap = [];
+    readonly Dictionary<int, Models.Target.Media> _photoIdMap = [];
     readonly Dictionary<short, Guid> _videoCategoryIdMap = [];
-    readonly Dictionary<int, Guid> _videoIdMap = [];
+    readonly Dictionary<int, Models.Target.Media> _videoIdMap = [];
 
     Models.Target.User Admin =>
         _target.Users.Single(x => string.Equals(x.Email, "mmorano@mikeandwan.us", StringComparison.OrdinalIgnoreCase));
@@ -27,6 +27,15 @@ public class TargetBuilder
         PrepareMedia(src.Photos, src.Videos);
         PrepareComments(src.PhotoComments, src.VideoComments);
         PrepareRatings(src.PhotoRatings, src.VideoRatings);
+        PrepareLocations(
+            src.PhotoReverseGeocodes,
+            src.Photos,
+            src.PhotoGpsOverrides,
+            src.VideoReverseGeocodes,
+            src.Videos,
+            src.VideoGpsOverrides
+        );
+        PreparePointsOfInterest(src.PhotoPointOfInterests, src.VideoPointOfInterests);
 
         return _target;
     }
@@ -155,7 +164,7 @@ public class TargetBuilder
                                 Guid.Empty   // TODO
                             );
 
-                            _photoIdMap.Add(x.Id, media.Id);
+                            _photoIdMap.Add(x.Id, media);
 
                             return media;
                         })
@@ -174,7 +183,7 @@ public class TargetBuilder
                                 Guid.Empty   // TODO
                             );
 
-                            _videoIdMap.Add(x.Id, media.Id);
+                            _videoIdMap.Add(x.Id, media);
 
                             return media;
                         })
@@ -192,7 +201,7 @@ public class TargetBuilder
             var targetComment = new Models.Target.Comment
             {
                 Id = Guid.CreateVersion7(),
-                MediaId = _photoIdMap[comment.PhotoId],
+                MediaId = _photoIdMap[comment.PhotoId].Id,
                 Created = comment.EntryDate,
                 CreatedBy = _userIdMap[comment.UserId],
                 Modified = DateTime.MinValue,
@@ -207,7 +216,7 @@ public class TargetBuilder
             var targetComment = new Models.Target.Comment
             {
                 Id = Guid.CreateVersion7(),
-                MediaId = _videoIdMap[comment.VideoId],
+                MediaId = _videoIdMap[comment.VideoId].Id,
                 Created = comment.EntryDate,
                 CreatedBy = _userIdMap[comment.UserId],
                 Modified = DateTime.MinValue,
@@ -226,7 +235,7 @@ public class TargetBuilder
         {
             var targetRating = new Models.Target.Rating
             {
-                MediaId = _photoIdMap[rating.PhotoId],
+                MediaId = _photoIdMap[rating.PhotoId].Id,
                 CreatedBy = _userIdMap[rating.UserId],
                 Created = DateTime.MinValue,
                 Modified = DateTime.MinValue,
@@ -240,7 +249,7 @@ public class TargetBuilder
         {
             var targetRating = new Models.Target.Rating
             {
-                MediaId = _videoIdMap[rating.VideoId],
+                MediaId = _videoIdMap[rating.VideoId].Id,
                 CreatedBy = _userIdMap[rating.UserId],
                 Created = DateTime.MinValue,
                 Modified = DateTime.MinValue,
@@ -248,6 +257,128 @@ public class TargetBuilder
             };
 
             _target.Ratings.Add(targetRating);
+        }
+    }
+
+    void PrepareLocations(
+        IEnumerable<PhotoReverseGeocode> photoReverseGeocodes,
+        IEnumerable<Photo> photos,
+        IEnumerable<PhotoGpsOverride> photoGpsOverrides,
+        IEnumerable<VideoReverseGeocode> videoReverseGeocodes,
+        IEnumerable<Video> videos,
+        IEnumerable<VideoGpsOverride> videoGpsOverrides
+    ) {
+        foreach(var reverseGeocode in photoReverseGeocodes)
+        {
+            var targetMedia = _photoIdMap[reverseGeocode.PhotoId];
+
+            if(reverseGeocode.IsOverride) {
+                var gpsOverride = photoGpsOverrides
+                    .Single(x => x.PhotoId == reverseGeocode.PhotoId);
+
+                var targetLocation = reverseGeocode.ToTarget(
+                    gpsOverride.Latitude,
+                    gpsOverride.Longitude
+                );
+
+                targetMedia.LocationOverrideId = targetLocation.Id;
+
+                _target.Locations.Add(targetLocation);
+            } else {
+                var photo = photos
+                    .Single(x => x.Id == reverseGeocode.PhotoId);
+
+                var targetLocation = reverseGeocode.ToTarget(
+                    photo.GpsLatitude,
+                    photo.GpsLongitude
+                );
+
+                targetMedia.LocationId = targetLocation.Id;
+
+                _target.Locations.Add(targetLocation);
+            }
+        }
+
+        foreach(var reverseGeocode in videoReverseGeocodes)
+        {
+            var targetMedia = _videoIdMap[reverseGeocode.VideoId];
+
+            if(reverseGeocode.IsOverride) {
+                var gpsOverride = videoGpsOverrides
+                    .Single(x => x.VideoId == reverseGeocode.VideoId);
+
+                var targetLocation = reverseGeocode.ToTarget(
+                    gpsOverride.Latitude,
+                    gpsOverride.Longitude
+                );
+
+                targetMedia.LocationOverrideId = targetLocation.Id;
+
+                _target.Locations.Add(targetLocation);
+            } else {
+                var photo = videos
+                    .Single(x => x.Id == reverseGeocode.VideoId);
+
+                var targetLocation = reverseGeocode.ToTarget(
+                    photo.GpsLatitude,
+                    photo.GpsLongitude
+                );
+
+                targetMedia.LocationId = targetLocation.Id;
+
+                _target.Locations.Add(targetLocation);
+            }
+        }
+
+        // TODO: look for duplicates based on gps coords
+    }
+
+    void PreparePointsOfInterest(
+        IEnumerable<PhotoPointOfInterest> photoPointsOfInterest,
+        IEnumerable<VideoPointOfInterest> videoPointsOfInterest
+    ) {
+        foreach(var poi in photoPointsOfInterest)
+        {
+            var targetMedia = _photoIdMap[poi.PhotoId];
+
+            if(poi.IsOverride)
+            {
+                _target.PointsOfInterest.Add(new Models.Target.PointOfInterest
+                {
+                    LocationId = targetMedia.LocationOverrideId,
+                    Type = poi.PoiType,
+                    Name = poi.PoiName
+                });
+            } else {
+                _target.PointsOfInterest.Add(new Models.Target.PointOfInterest
+                {
+                    LocationId = targetMedia.LocationId,
+                    Type = poi.PoiType,
+                    Name = poi.PoiName
+                });
+            }
+        }
+
+        foreach(var poi in videoPointsOfInterest)
+        {
+            var targetMedia = _photoIdMap[poi.VideoId];
+
+            if(poi.IsOverride)
+            {
+                _target.PointsOfInterest.Add(new Models.Target.PointOfInterest
+                {
+                    LocationId = targetMedia.LocationOverrideId,
+                    Type = poi.PoiType,
+                    Name = poi.PoiName
+                });
+            } else {
+                _target.PointsOfInterest.Add(new Models.Target.PointOfInterest
+                {
+                    LocationId = targetMedia.LocationId,
+                    Type = poi.PoiType,
+                    Name = poi.PoiName
+                });
+            }
         }
     }
 }

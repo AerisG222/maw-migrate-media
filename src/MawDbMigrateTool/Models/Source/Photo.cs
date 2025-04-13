@@ -37,4 +37,6 @@ public class Photo
     public string XsSqPath { get; set; }
     public int XsSqSize { get; set; }
 
+    public double GpsLatitude { get; set; }
+    public double GpsLongitude { get; set; }
 }

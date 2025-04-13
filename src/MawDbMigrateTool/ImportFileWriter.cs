@@ -23,6 +23,8 @@ public class ImportFileWriter
 
         await WriteCategories(writer, db.Categories);
         await WriteCategoryRoles(writer, db.CategoryRoles);
+        await WriteLocations(writer, db.Locations);
+        await WritePointsOfInterest(writer, db.PointsOfInterest);
         await WriteMedia(writer, db.Media);
         await WriteComments(writer, db.Comments);
         await WriteRatings(writer, db.Ratings);
@@ -74,6 +76,80 @@ public class ImportFileWriter
                 ) VALUES (
                     {SqlAsString(categoryRole.CategoryId)},
                     {SqlAsString(categoryRole.RoleId)}
+                );
+                """);
+        }
+    }
+
+    async Task WriteLocations(StreamWriter writer, List<Location> locations)
+    {
+        await WriteHeader(writer, "LOCATIONS");
+
+        foreach (var location in locations)
+        {
+            await writer.WriteLineAsync(
+                $"""
+                INSERT INTO maw.location (
+                    id,
+                    latitude,
+                    longitude,
+                    lookup_date,
+                    formatted_address,
+                    administrative_area_level_1,
+                    administrative_area_level_2,
+                    administrative_area_level_3,
+                    country,
+                    locality,
+                    neighborhood,
+                    sub_locality_level_1,
+                    sub_locality_level_2,
+                    postal_code,
+                    postal_code_suffix,
+                    premise,
+                    route,
+                    street_number,
+                    sub_premise
+                ) VALUES (
+                    {SqlAsString(location.Id)},
+                    {SqlNonString(location.Latitude)},
+                    {SqlNonString(location.Longitude)},
+                    {SqlString(location.LookupDate.ToString("yyyy-MM-dd HH:mm:ss"))},
+                    {SqlString(location.FormattedAddress)},
+                    {SqlString(location.AdministrativeAreaLevel1)},
+                    {SqlString(location.AdministrativeAreaLevel2)},
+                    {SqlString(location.AdministrativeAreaLevel3)},
+                    {SqlString(location.Country)},
+                    {SqlString(location.Locality)},
+                    {SqlString(location.Neighborhood)},
+                    {SqlString(location.SubLocalityLevel1)},
+                    {SqlString(location.SubLocalityLevel2)},
+                    {SqlString(location.PostalCode)},
+                    {SqlString(location.PostalCodeSuffix)},
+                    {SqlString(location.Premise)},
+                    {SqlString(location.Route)},
+                    {SqlString(location.StreetNumber)},
+                    {SqlString(location.SubPremise)}
+                );
+                """);
+        }
+    }
+
+    async Task WritePointsOfInterest(StreamWriter writer, List<PointOfInterest> pointsOfInterest)
+    {
+        await WriteHeader(writer, "POINTS_OF_INTEREST");
+
+        foreach (var poi in pointsOfInterest)
+        {
+            await writer.WriteLineAsync(
+                $"""
+                INSERT INTO maw.point_of_interest (
+                    location_id,
+                    type,
+                    name
+                ) VALUES (
+                    {SqlAsString(poi.LocationId)},
+                    {SqlString(poi.Type)},
+                    {SqlString(poi.Name)}
                 );
                 """);
         }
