@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace MawDbMigrateTool.Models.Source;
 
 public class PhotoCategory
@@ -26,4 +28,9 @@ public class PhotoCategory
     public short TeaserPhotoSqWidth { get; set; }
     public string TeaserPhotoSqPath { get; set; }
     public int TeaserPhotoSqSize { get; set; }
+
+    public DateTime SortKey =>
+        CreateDate != DateTime.MinValue
+            ? CreateDate
+            : DateTime.ParseExact($"{Year}-01-01 00:01:01.{Id}", "yyyy-MM-dd HH:mm:ss.FFFFFF", DateTimeFormatInfo.InvariantInfo);
 }

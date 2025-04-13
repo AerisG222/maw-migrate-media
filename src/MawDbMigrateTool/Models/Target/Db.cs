@@ -2,8 +2,13 @@ namespace MawDbMigrateTool.Models.Target;
 
 public class Db
 {
-    // USERS
-    public List<User> Users { get; set; } = [];
-    public List<Role> Roles { get; set; } = [];
-    public List<UserRole> UserRoles { get; set; } = [];
+    public List<User> Users { get; } = [];
+    public List<Role> Roles { get; } = [];
+    public List<UserRole> UserRoles { get; } = [];
+
+    public List<Category> Categories { get; } = [];
+    public List<CategoryRole> CategoryRoles { get; } = [];
+    public List<Media> Media { get; } = [];
+    public List<Comment> Comments { get; } = [];
+    public List<Rating> Ratings { get; } = [];
 }

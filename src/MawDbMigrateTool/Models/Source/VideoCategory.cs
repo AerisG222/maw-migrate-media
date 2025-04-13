@@ -25,4 +25,9 @@ public class VideoCategory
     public short TeaserImageSqWidth { get; set; }
     public string TeaserImageSqPath { get; set; }
     public int TeaserImageSqSize { get; set; }
+
+    public DateTime SortKey =>
+        CreateDate != DateTime.MinValue
+            ? CreateDate
+            : new DateTime(Year, 1, 1, 0, 0, 0, Id, DateTimeKind.Utc);
 }

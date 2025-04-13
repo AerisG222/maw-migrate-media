@@ -21,10 +21,143 @@ public class ImportFileWriter
         await WriteRoles(writer, db.Roles);
         await WriteUserRoles(writer, db.UserRoles);
 
+        await WriteCategories(writer, db.Categories);
+        await WriteCategoryRoles(writer, db.CategoryRoles);
+        await WriteMedia(writer, db.Media);
+        await WriteComments(writer, db.Comments);
+        await WriteRatings(writer, db.Ratings);
+
         await WriteEnding(writer);
 
         await writer.FlushAsync();
         await writer.DisposeAsync();
+    }
+
+    async Task WriteCategories(StreamWriter writer, List<Category> categories)
+    {
+        await WriteHeader(writer, "CATEGORIES");
+
+        foreach (var category in categories)
+        {
+            await writer.WriteLineAsync(
+                $"""
+                INSERT INTO maw.category (
+                    id,
+                    name,
+                    teaser_media_id,
+                    effective_date,
+                    created,
+                    modified
+                ) VALUES (
+                    {SqlAsString(category.Id)},
+                    {SqlString(category.Name)},
+                    {SqlAsString(category.TeaserMediaId)},
+                    {SqlString(category.EffectiveDate.ToString("yyyy-MM-dd HH:mm:ss"))},
+                    {SqlString(category.Created.ToString("yyyy-MM-dd HH:mm:ss"))},
+                    {SqlString(category.Modified.ToString("yyyy-MM-dd HH:mm:ss"))}
+                );
+                """);
+        }
+    }
+
+    async Task WriteCategoryRoles(StreamWriter writer, List<CategoryRole> categoryRoles)
+    {
+        await WriteHeader(writer, "CATEGORY_ROLES");
+
+        foreach (var categoryRole in categoryRoles)
+        {
+            await writer.WriteLineAsync(
+                $"""
+                INSERT INTO maw.category_role (
+                    category_id,
+                    role_id
+                ) VALUES (
+                    {SqlAsString(categoryRole.CategoryId)},
+                    {SqlAsString(categoryRole.RoleId)}
+                );
+                """);
+        }
+    }
+
+    async Task WriteMedia(StreamWriter writer, List<Media> media)
+    {
+        await WriteHeader(writer, "MEDIA");
+
+        foreach (var mediaItem in media)
+        {
+            await writer.WriteLineAsync(
+                $"""
+                INSERT INTO maw.media (
+                    id,
+                    category_id,
+                    media_type_id,
+                    location_id,
+                    location_override_id,
+                    created,
+                    modified
+                ) VALUES (
+                    {SqlAsString(mediaItem.Id)},
+                    {SqlAsString(mediaItem.CategoryId)},
+                    {SqlAsString(mediaItem.MediaTypeId)},
+                    {SqlAsString(mediaItem.LocationId)},
+                    {SqlAsString(mediaItem.LocationOverrideId)},
+                    {SqlString(mediaItem.Created.ToString("yyyy-MM-dd HH:mm:ss"))},
+                    {SqlString(mediaItem.Modified.ToString("yyyy-MM-dd HH:mm:ss"))}
+                );
+                """);
+        }
+    }
+
+    async Task WriteComments(StreamWriter writer, List<Comment> comments)
+    {
+        await WriteHeader(writer, "COMMENTS");
+
+        foreach (var comment in comments)
+        {
+            await writer.WriteLineAsync(
+                $"""
+                INSERT INTO maw.comment (
+                    id,
+                    media_id,
+                    created_by,
+                    created,
+                    modified,
+                    body
+                ) VALUES (
+                    {SqlAsString(comment.Id)},
+                    {SqlAsString(comment.MediaId)},
+                    {SqlAsString(comment.CreatedBy)},
+                    {SqlString(comment.Created.ToString("yyyy-MM-dd HH:mm:ss"))},
+                    {SqlString(comment.Modified.ToString("yyyy-MM-dd HH:mm:ss"))},
+                    {SqlString(comment.Body)}
+                );
+                """);
+        }
+    }
+
+    async Task WriteRatings(StreamWriter writer, List<Rating> ratings)
+    {
+        await WriteHeader(writer, "RATINGS");
+
+        foreach (var rating in ratings)
+        {
+            await writer.WriteLineAsync(
+                $"""
+                INSERT INTO maw.rating (
+                    media_id,
+                    created_by,
+                    created,
+                    modified,
+                    rating
+                ) VALUES (
+                    {SqlAsString(rating.MediaId)},
+                    {SqlAsString(rating.CreatedBy)},
+                    {SqlString(rating.Created.ToString("yyyy-MM-dd HH:mm:ss"))},
+                    {SqlString(rating.Modified.ToString("yyyy-MM-dd HH:mm:ss"))},
+                    {SqlNonString(rating.Score)}
+                );
+                """);
+        }
     }
 
     async Task WriteUsers(StreamWriter writer, List<User> users)
