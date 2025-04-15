@@ -13,11 +13,15 @@ public class TargetBuilder
     readonly Dictionary<short, Guid> _videoCategoryIdMap = [];
     readonly Dictionary<int, Models.Target.Media> _videoIdMap = [];
 
+    readonly Dictionary<string, Guid> _locationMap = [];
+
     Models.Target.User Admin =>
         _target.Users.Single(x => string.Equals(x.Email, "mmorano@mikeandwan.us", StringComparison.OrdinalIgnoreCase));
 
     public Models.Target.Db Build(Db src)
     {
+        BuildLocationLookup(src.Photos, src.PhotoGpsOverrides, src.Videos, src.VideoGpsOverrides);
+
         PrepareUsers(src.Users);
         PrepareRoles(src.Roles);
         PrepareUserRoles(src.UserRoles);
@@ -260,6 +264,71 @@ public class TargetBuilder
         }
     }
 
+    string BuildLocationKey(
+        double? latitude,
+        double? longitude
+    ) {
+        if(latitude == null || longitude == null)
+        {
+            return string.Empty;
+        }
+
+        return $"{latitude:f6},{longitude:f6}";
+    }
+
+    void BuildLocationLookup(
+        IEnumerable<Photo> photos,
+        IEnumerable<PhotoGpsOverride> photoGpsOverrides,
+        IEnumerable<Video> videos,
+        IEnumerable<VideoGpsOverride> videoGpsOverrides
+    ) {
+        foreach(var photo in photos)
+        {
+            if(photo.GpsLatitude != null && photo.GpsLongitude != null)
+            {
+                var key = BuildLocationKey(photo.GpsLatitude, photo.GpsLongitude);
+
+                if(!_locationMap.ContainsKey(key))
+                {
+                    _locationMap.Add(key, Guid.CreateVersion7());
+                }
+            }
+        }
+
+        foreach(var photo in photoGpsOverrides)
+        {
+            var key = BuildLocationKey(photo.Latitude, photo.Longitude);
+
+            if(!_locationMap.ContainsKey(key))
+            {
+                _locationMap.Add(key, Guid.CreateVersion7());
+            }
+        }
+
+        foreach(var video in videos)
+        {
+            if(video.GpsLatitude != null && video.GpsLongitude != null)
+            {
+                var key = BuildLocationKey(video.GpsLatitude, video.GpsLongitude);
+
+                if(!_locationMap.ContainsKey(key))
+                {
+                    _locationMap.Add(key, Guid.CreateVersion7());
+                }
+            }
+        }
+
+        foreach(var video in videoGpsOverrides)
+        {
+            var key = BuildLocationKey(video.Latitude, video.Longitude);
+
+            if(!_locationMap.ContainsKey(key))
+            {
+                _locationMap.Add(key, Guid.CreateVersion7());
+            }
+        }
+    }
+
     void PrepareLocations(
         IEnumerable<PhotoReverseGeocode> photoReverseGeocodes,
         IEnumerable<Photo> photos,
@@ -277,6 +346,7 @@ public class TargetBuilder
                     .Single(x => x.PhotoId == reverseGeocode.PhotoId);
 
                 var targetLocation = reverseGeocode.ToTarget(
+                    _locationMap[BuildLocationKey(gpsOverride.Latitude, gpsOverride.Longitude)],
                     gpsOverride.Latitude,
                     gpsOverride.Longitude
                 );
@@ -289,8 +359,9 @@ public class TargetBuilder
                     .Single(x => x.Id == reverseGeocode.PhotoId);
 
                 var targetLocation = reverseGeocode.ToTarget(
-                    photo.GpsLatitude,
-                    photo.GpsLongitude
+                    _locationMap[BuildLocationKey(photo.GpsLatitude, photo.GpsLongitude)],
+                    photo.GpsLatitude!.Value,
+                    photo.GpsLongitude!.Value
                 );
 
                 targetMedia.LocationId = targetLocation.Id;
@@ -308,6 +379,7 @@ public class TargetBuilder
                     .Single(x => x.VideoId == reverseGeocode.VideoId);
 
                 var targetLocation = reverseGeocode.ToTarget(
+                    _locationMap[BuildLocationKey(gpsOverride.Latitude, gpsOverride.Longitude)],
                     gpsOverride.Latitude,
                     gpsOverride.Longitude
                 );
@@ -316,12 +388,13 @@ public class TargetBuilder
 
                 _target.Locations.Add(targetLocation);
             } else {
-                var photo = videos
+                var video = videos
                     .Single(x => x.Id == reverseGeocode.VideoId);
 
                 var targetLocation = reverseGeocode.ToTarget(
-                    photo.GpsLatitude,
-                    photo.GpsLongitude
+                    _locationMap[BuildLocationKey(video.GpsLatitude, video.GpsLongitude)],
+                    video.GpsLatitude!.Value,
+                    video.GpsLongitude!.Value
                 );
 
                 targetMedia.LocationId = targetLocation.Id;
@@ -329,10 +402,9 @@ public class TargetBuilder
                 _target.Locations.Add(targetLocation);
             }
         }
-
-        // TODO: look for duplicates based on gps coords
     }
 
+    // TODO: dedupe
     void PreparePointsOfInterest(
         IEnumerable<PhotoPointOfInterest> photoPointsOfInterest,
         IEnumerable<VideoPointOfInterest> videoPointsOfInterest

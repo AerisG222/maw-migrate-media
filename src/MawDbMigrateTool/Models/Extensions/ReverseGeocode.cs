@@ -7,12 +7,13 @@ public static class ReverseGeocodeExtensions
 {
     public static Location ToTarget(
         this PhotoReverseGeocode reverseGeocode,
+        Guid id,
         double latitude,
         double longitude
     ) {
         return new Location
         {
-            Id = Guid.CreateVersion7(),
+            Id = id,
             Latitude = latitude,
             Longitude = longitude,
             LookupDate = DateTime.MinValue,
@@ -36,12 +37,13 @@ public static class ReverseGeocodeExtensions
 
     public static Location ToTarget(
         this VideoReverseGeocode reverseGeocode,
+        Guid id,
         double latitude,
         double longitude
     ) {
         return new Location
         {
-            Id = Guid.CreateVersion7(),
+            Id = id,
             Latitude = latitude,
             Longitude = longitude,
             LookupDate = DateTime.MinValue,

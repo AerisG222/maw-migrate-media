@@ -16,8 +16,8 @@ public class Video
     public string FullPath { get; set; }
     public string RawPath { get; set; }
     public DateTime CreateDate { get; set; }
-    public double GpsLatitude { get; set; }
-    public double GpsLongitude { get; set; }
+    public double? GpsLatitude { get; set; }
+    public double? GpsLongitude { get; set; }
     public string GpsLatitudeRefId { get; set; }
     public string GpsLongitudeRefId { get; set; }
     public int ThumbSize { get; set; }
