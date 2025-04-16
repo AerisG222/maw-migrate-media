@@ -404,25 +404,26 @@ public class TargetBuilder
         }
     }
 
-    // TODO: dedupe
     void PreparePointsOfInterest(
         IEnumerable<PhotoPointOfInterest> photoPointsOfInterest,
         IEnumerable<VideoPointOfInterest> videoPointsOfInterest
     ) {
+        var list = new List<Models.Target.PointOfInterest>();
+
         foreach(var poi in photoPointsOfInterest)
         {
             var targetMedia = _photoIdMap[poi.PhotoId];
 
             if(poi.IsOverride)
             {
-                _target.PointsOfInterest.Add(new Models.Target.PointOfInterest
+                list.Add(new Models.Target.PointOfInterest
                 {
                     LocationId = targetMedia.LocationOverrideId,
                     Type = poi.PoiType,
                     Name = poi.PoiName
                 });
             } else {
-                _target.PointsOfInterest.Add(new Models.Target.PointOfInterest
+                list.Add(new Models.Target.PointOfInterest
                 {
                     LocationId = targetMedia.LocationId,
                     Type = poi.PoiType,
@@ -437,14 +438,14 @@ public class TargetBuilder
 
             if(poi.IsOverride)
             {
-                _target.PointsOfInterest.Add(new Models.Target.PointOfInterest
+                list.Add(new Models.Target.PointOfInterest
                 {
                     LocationId = targetMedia.LocationOverrideId,
                     Type = poi.PoiType,
                     Name = poi.PoiName
                 });
             } else {
-                _target.PointsOfInterest.Add(new Models.Target.PointOfInterest
+                list.Add(new Models.Target.PointOfInterest
                 {
                     LocationId = targetMedia.LocationId,
                     Type = poi.PoiType,
@@ -452,5 +453,10 @@ public class TargetBuilder
                 });
             }
         }
+
+        _target.PointsOfInterest.AddRange(list
+            .DistinctBy(x => new { x.LocationId, x.Type, x.Name })
+            .ToList()
+        );
     }
 }
