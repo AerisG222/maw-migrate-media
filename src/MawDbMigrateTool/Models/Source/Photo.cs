@@ -22,6 +22,7 @@ public class Photo
     public short SrcHeight { get; set; }
     public short SrcWidth { get; set; }
     public string SrcPath { get; set; }
+    public DateTime CreateDate { get; set; }
 
     public short AwsGlacierVaultId { get; set; }
     public string AwsArchiveId { get; set; }

@@ -8,20 +8,19 @@ public static class MediaExtensions
     public static Media ToTarget(
         this Photo photo,
         Guid categoryId,
-        Guid locationId,
-        Guid locationOverrideId
+        Guid adminId
     ) {
         return new Media
         {
             Id = Guid.CreateVersion7(),
             CategoryId = categoryId,
             MediaTypeId = MediaType.Photo.Id,
-            LocationId = locationId,
-            LocationOverrideId = locationOverrideId,
-            Created = DateTime.MinValue,
-            CreatedBy = Guid.Empty,
+            LocationId = null,
+            LocationOverrideId = null,
+            Created = photo.CreateDate,
+            CreatedBy = adminId,
             Modified = DateTime.MinValue,
-            ModifiedBy = Guid.Empty,
+            ModifiedBy = adminId,
 
             LegacyId = photo.Id,
             LegacyCategoryId = photo.CategoryId
@@ -31,20 +30,19 @@ public static class MediaExtensions
     public static Media ToTarget(
         this Video video,
         Guid categoryId,
-        Guid locationId,
-        Guid locationOverrideId
+        Guid adminId
     ) {
         return new Media
         {
             Id = Guid.CreateVersion7(),
             CategoryId = categoryId,
             MediaTypeId = MediaType.Video.Id,
-            LocationId = locationId,
-            LocationOverrideId = locationOverrideId,
-            Created = DateTime.MinValue,
-            CreatedBy = Guid.Empty,
+            LocationId = null,
+            LocationOverrideId = null,
+            Created = video.CreateDate,
+            CreatedBy = adminId,
             Modified = DateTime.MinValue,
-            ModifiedBy = Guid.Empty,
+            ModifiedBy = adminId,
 
             LegacyId = video.Id,
             LegacyCategoryId = video.CategoryId
