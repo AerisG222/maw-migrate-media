@@ -45,6 +45,7 @@ public class TargetBuilder
         PrepareCategoryRoles(src.PhotoCategoryRoles, src.VideoCategoryRoles);
         PrepareMedia(src.Photos, src.PhotoGpsOverrides, src.Videos, src.VideoGpsOverrides);
         PrepareMediaFiles(src.Photos, src.Videos);
+        PrepareCategoryMedia(src.Photos, src.PhotoCategories, src.Videos, src.VideoCategories);
         PrepareComments(src.PhotoComments, src.VideoComments);
         PrepareRatings(src.PhotoRatings, src.VideoRatings);
         PrepareLocations(
@@ -581,7 +582,8 @@ public class TargetBuilder
     void PrepareMediaFiles(
         IEnumerable<Photo> photos,
         IEnumerable<Video> videos
-    ) {
+    )
+    {
         foreach (var photo in photos)
         {
             var media = _photoIdMap[photo.Id];
@@ -619,6 +621,52 @@ public class TargetBuilder
             };
 
             _target.MediaFiles.Add(targetMediaFile);
+        }
+    }
+
+    void PrepareCategoryMedia(
+        IEnumerable<Photo> photos,
+        IEnumerable<PhotoCategory> photoCategories,
+        IEnumerable<Video> videos,
+        IEnumerable<VideoCategory> videoCategories
+    ) {
+        foreach (var photo in photos)
+        {
+            var category = photoCategories.Single(x => x.Id == photo.CategoryId);
+            var media = _photoIdMap[photo.Id];
+
+            var targetCategoryMedia = new Models.Target.CategoryMedia
+            {
+                CategoryId = _photoCategoryIdMap[category.Id],
+                MediaId = media.Id,
+                IsTeaser = false,  // TODO
+                Created = DateTime.MinValue,
+                CreatedBy = Admin.Id,
+                Modified = DateTime.MinValue,
+                ModifiedBy = Admin.Id
+            };
+
+            _target.CategoryMedia.Add(targetCategoryMedia);
+        }
+
+        foreach (var video in videos)
+        {
+            var category = videoCategories.Single(x => x.Id == video.CategoryId);
+            var media = _videoIdMap[video.Id];
+
+
+            var targetCategoryMedia = new Models.Target.CategoryMedia
+            {
+                CategoryId = _videoCategoryIdMap[category.Id],
+                MediaId = media.Id,
+                IsTeaser = false,  // TODO
+                Created = DateTime.MinValue,
+                CreatedBy = Admin.Id,
+                Modified = DateTime.MinValue,
+                ModifiedBy = Admin.Id
+            };
+
+            _target.CategoryMedia.Add(targetCategoryMedia);
         }
     }
 }

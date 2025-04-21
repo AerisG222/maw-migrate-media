@@ -27,6 +27,7 @@ public class ImportFileWriter
         await WritePointsOfInterest(writer, db.PointsOfInterest);
         await WriteMedia(writer, db.Media);
         await WriteMediaFiles(writer, db.MediaFiles);
+        await WriteCategoryMedia(writer, db.CategoryMedia);
         await WriteComments(writer, db.Comments);
         await WriteRatings(writer, db.Ratings);
 
@@ -209,6 +210,35 @@ public class ImportFileWriter
                     {SqlNonString(file.Height)},
                     {SqlNonString(file.Bytes)},
                     {SqlString(file.Path)}
+                );
+                """);
+        }
+    }
+
+    async Task WriteCategoryMedia(StreamWriter writer, List<CategoryMedia> categoryMedias)
+    {
+        await WriteHeader(writer, "CATEGORY MEDIA");
+
+        foreach (var categoryMedia in categoryMedias)
+        {
+            await writer.WriteLineAsync(
+                $"""
+                INSERT INTO media.category_media (
+                    category_id,
+                    media_id,
+                    is_teaser,
+                    created,
+                    created_by,
+                    modified,
+                    modified_by
+                ) VALUES (
+                    {SqlAsString(categoryMedia.CategoryId)},
+                    {SqlAsString(categoryMedia.MediaId)},
+                    {SqlNonString(categoryMedia.IsTeaser)},
+                    {SqlString(categoryMedia.Created.ToString("yyyy-MM-dd HH:mm:ss"))},
+                    {SqlAsString(categoryMedia.CreatedBy)},
+                    {SqlString(categoryMedia.Modified.ToString("yyyy-MM-dd HH:mm:ss"))},
+                    {SqlAsString(categoryMedia.ModifiedBy)}
                 );
                 """);
         }
