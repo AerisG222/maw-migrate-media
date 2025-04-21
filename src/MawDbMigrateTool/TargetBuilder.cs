@@ -44,6 +44,7 @@ public class TargetBuilder
         PrepareCategories(src.PhotoCategories, src.VideoCategories);
         PrepareCategoryRoles(src.PhotoCategoryRoles, src.VideoCategoryRoles);
         PrepareMedia(src.Photos, src.PhotoGpsOverrides, src.Videos, src.VideoGpsOverrides);
+        PrepareMediaFiles(src.Photos, src.Videos);
         PrepareComments(src.PhotoComments, src.VideoComments);
         PrepareRatings(src.PhotoRatings, src.VideoRatings);
         PrepareLocations(
@@ -549,7 +550,7 @@ public class TargetBuilder
             media.LocationId = string.IsNullOrWhiteSpace(locationKey) ? null : _locationIdMap[locationKey];
         }
 
-        foreach(var gpsOverride in photoGpsOverrides)
+        foreach (var gpsOverride in photoGpsOverrides)
         {
             var locationKey = BuildLocationKey(gpsOverride.Latitude, gpsOverride.Longitude);
             var media = _photoIdMap[gpsOverride.PhotoId];
@@ -568,12 +569,56 @@ public class TargetBuilder
             media.LocationId = string.IsNullOrWhiteSpace(locationKey) ? null : _locationIdMap[locationKey];
         }
 
-        foreach(var gpsOverride in videoGpsOverrides)
+        foreach (var gpsOverride in videoGpsOverrides)
         {
             var locationKey = BuildLocationKey(gpsOverride.Latitude, gpsOverride.Longitude);
             var media = _videoIdMap[gpsOverride.VideoId];
 
             media.LocationOverrideId = string.IsNullOrWhiteSpace(locationKey) ? null : _locationIdMap[locationKey];
+        }
+    }
+
+    void PrepareMediaFiles(
+        IEnumerable<Photo> photos,
+        IEnumerable<Video> videos
+    ) {
+        foreach (var photo in photos)
+        {
+            var media = _photoIdMap[photo.Id];
+
+            var targetMediaFile = new Models.Target.MediaFile
+            {
+                MediaId = media.Id,
+                MediaTypeId = Models.Target.MediaType.Photo.Id,
+                ScaleId = Models.Target.Scale.Src.Id,
+                Width = photo.SrcWidth,
+                Height = photo.SrcHeight,
+                Bytes = photo.SrcSize,
+                Path = photo.SrcPath
+                    .Replace("/images/", "/media/")
+            };
+
+            _target.MediaFiles.Add(targetMediaFile);
+        }
+
+        foreach (var video in videos)
+        {
+            var media = _videoIdMap[video.Id];
+
+            var targetMediaFile = new Models.Target.MediaFile
+            {
+                MediaId = media.Id,
+                MediaTypeId = Models.Target.MediaType.Video.Id,
+                ScaleId = Models.Target.Scale.Src.Id,
+                Width = video.RawWidth,
+                Height = video.RawHeight,
+                Bytes = video.RawSize,
+                Path = video.RawPath
+                    .Replace("/raw/", "/src/")
+                    .Replace("/movies/", "/media/")
+            };
+
+            _target.MediaFiles.Add(targetMediaFile);
         }
     }
 }

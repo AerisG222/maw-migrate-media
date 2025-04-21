@@ -26,6 +26,7 @@ public class ImportFileWriter
         await WriteLocations(writer, db.Locations);
         await WritePointsOfInterest(writer, db.PointsOfInterest);
         await WriteMedia(writer, db.Media);
+        await WriteMediaFiles(writer, db.MediaFiles);
         await WriteComments(writer, db.Comments);
         await WriteRatings(writer, db.Ratings);
 
@@ -43,7 +44,7 @@ public class ImportFileWriter
         {
             await writer.WriteLineAsync(
                 $"""
-                INSERT INTO maw.category (
+                INSERT INTO media.category (
                     id,
                     name,
                     teaser_media_id,
@@ -70,7 +71,7 @@ public class ImportFileWriter
         {
             await writer.WriteLineAsync(
                 $"""
-                INSERT INTO maw.category_role (
+                INSERT INTO media.category_role (
                     category_id,
                     role_id
                 ) VALUES (
@@ -89,7 +90,7 @@ public class ImportFileWriter
         {
             await writer.WriteLineAsync(
                 $"""
-                INSERT INTO maw.location (
+                INSERT INTO media.location (
                     id,
                     latitude,
                     longitude,
@@ -142,7 +143,7 @@ public class ImportFileWriter
         {
             await writer.WriteLineAsync(
                 $"""
-                INSERT INTO maw.point_of_interest (
+                INSERT INTO media.point_of_interest (
                     location_id,
                     type,
                     name
@@ -163,7 +164,7 @@ public class ImportFileWriter
         {
             await writer.WriteLineAsync(
                 $"""
-                INSERT INTO maw.media (
+                INSERT INTO media.media (
                     id,
                     category_id,
                     media_type_id,
@@ -184,6 +185,35 @@ public class ImportFileWriter
         }
     }
 
+    async Task WriteMediaFiles(StreamWriter writer, List<MediaFile> mediaFiles)
+    {
+        await WriteHeader(writer, "MEDIA FILES");
+
+        foreach(var file in mediaFiles)
+        {
+            await writer.WriteLineAsync(
+                $"""
+                INSERT INTO media.media_file (
+                    media_id,
+                    media_type_id,
+                    scale_id,
+                    width,
+                    height,
+                    bytes,
+                    path
+                ) VALUES (
+                    {SqlAsString(file.MediaId)},
+                    {SqlAsString(file.MediaTypeId)},
+                    {SqlAsString(file.ScaleId)},
+                    {SqlNonString(file.Width)},
+                    {SqlNonString(file.Height)},
+                    {SqlNonString(file.Bytes)},
+                    {SqlString(file.Path)}
+                );
+                """);
+        }
+    }
+
     async Task WriteComments(StreamWriter writer, List<Comment> comments)
     {
         await WriteHeader(writer, "COMMENTS");
@@ -192,7 +222,7 @@ public class ImportFileWriter
         {
             await writer.WriteLineAsync(
                 $"""
-                INSERT INTO maw.comment (
+                INSERT INTO media.comment (
                     id,
                     media_id,
                     created_by,
@@ -219,7 +249,7 @@ public class ImportFileWriter
         {
             await writer.WriteLineAsync(
                 $"""
-                INSERT INTO maw.rating (
+                INSERT INTO media.rating (
                     media_id,
                     created_by,
                     created,
@@ -244,7 +274,7 @@ public class ImportFileWriter
         {
             await writer.WriteLineAsync(
                 $"""
-                INSERT INTO maw.user (
+                INSERT INTO media.user (
                     id,
                     created,
                     modified,
@@ -279,7 +309,7 @@ public class ImportFileWriter
         {
             await writer.WriteLineAsync(
                 $"""
-                INSERT INTO maw.role (
+                INSERT INTO media.role (
                     id,
                     name
                 ) VALUES (
@@ -298,7 +328,7 @@ public class ImportFileWriter
         {
             await writer.WriteLineAsync(
                 $"""
-                INSERT INTO maw.user_role (
+                INSERT INTO media.user_role (
                     user_id,
                     role_id
                 ) VALUES (
