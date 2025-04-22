@@ -639,7 +639,7 @@ public class TargetBuilder
             {
                 CategoryId = _photoCategoryIdMap[category.Id],
                 MediaId = media.Id,
-                IsTeaser = false,  // TODO
+                IsTeaser = string.Equals(category.TeaserPhotoSqPath, photo.XsSqPath, StringComparison.OrdinalIgnoreCase),
                 Created = DateTime.MinValue,
                 CreatedBy = Admin.Id,
                 Modified = DateTime.MinValue,
@@ -659,7 +659,7 @@ public class TargetBuilder
             {
                 CategoryId = _videoCategoryIdMap[category.Id],
                 MediaId = media.Id,
-                IsTeaser = false,  // TODO
+                IsTeaser = string.Equals(category.TeaserImageSqPath, video.ThumbSqPath, StringComparison.OrdinalIgnoreCase),
                 Created = DateTime.MinValue,
                 CreatedBy = Admin.Id,
                 Modified = DateTime.MinValue,
