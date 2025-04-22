@@ -6,5 +6,5 @@ public class VideoComment
     public int VideoId { get; set; }
     public short UserId { get; set; }
     public DateTime EntryDate { get; set; }
-    public string Message { get; set; }
+    public string? Message { get; set; }
 }

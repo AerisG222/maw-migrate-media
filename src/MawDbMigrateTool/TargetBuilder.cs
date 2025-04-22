@@ -596,7 +596,7 @@ public class TargetBuilder
                 Width = photo.SrcWidth,
                 Height = photo.SrcHeight,
                 Bytes = photo.SrcSize,
-                Path = photo.SrcPath
+                Path = photo.SrcPath!
                     .Replace("/images/", "/media/")
             };
 
@@ -615,7 +615,7 @@ public class TargetBuilder
                 Width = video.RawWidth,
                 Height = video.RawHeight,
                 Bytes = video.RawSize,
-                Path = video.RawPath
+                Path = video.RawPath!
                     .Replace("/raw/", "/src/")
                     .Replace("/movies/", "/media/")
             };
