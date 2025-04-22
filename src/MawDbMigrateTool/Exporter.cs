@@ -17,6 +17,6 @@ public class Exporter
     {
         var src = await _dbReader.LoadData();
         var target = _targetBuilder.Build(src);
-        await _importWriter.WriteImportFile(target);
+        await _importWriter.WriteImportFiles(target);
     }
 }

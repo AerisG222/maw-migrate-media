@@ -11,7 +11,7 @@ public class ImportFileWriter
         _dir = outDir;
     }
 
-    public async Task WriteImportFile(Db db)
+    public async Task WriteImportFiles(Db db)
     {
         PrepareOutputDirectory();
 
@@ -53,7 +53,8 @@ public class ImportFileWriter
 
     async Task WriteCategories(StreamWriter writer, List<Category> categories)
     {
-        await WriteHeader(writer, "CATEGORIES");
+        Console.WriteLine($"- writing {categories.Count} categories");
+        await WriteHeader(writer, $"CATEGORIES ({categories.Count})");
 
         foreach (var category in categories)
         {
@@ -82,7 +83,8 @@ public class ImportFileWriter
 
     async Task WriteCategoryRoles(StreamWriter writer, List<CategoryRole> categoryRoles)
     {
-        await WriteHeader(writer, "CATEGORY_ROLES");
+        Console.WriteLine($"- writing {categoryRoles.Count} category roles");
+        await WriteHeader(writer, $"CATEGORY_ROLES ({categoryRoles.Count})");
 
         foreach (var categoryRole in categoryRoles)
         {
@@ -105,7 +107,8 @@ public class ImportFileWriter
 
     async Task WriteLocations(StreamWriter writer, List<Location> locations)
     {
-        await WriteHeader(writer, "LOCATIONS");
+        Console.WriteLine($"- writing {locations.Count} locations");
+        await WriteHeader(writer, $"LOCATIONS ({locations.Count})");
 
         foreach (var location in locations)
         {
@@ -158,7 +161,8 @@ public class ImportFileWriter
 
     async Task WritePointsOfInterest(StreamWriter writer, List<PointOfInterest> pointsOfInterest)
     {
-        await WriteHeader(writer, "POINTS_OF_INTEREST");
+        Console.WriteLine($"- writing {pointsOfInterest.Count} points of interest");
+        await WriteHeader(writer, $"POINTS_OF_INTEREST ({pointsOfInterest.Count})");
 
         foreach (var poi in pointsOfInterest)
         {
@@ -179,7 +183,8 @@ public class ImportFileWriter
 
     async Task WriteMedia(StreamWriter writer, List<Media> media)
     {
-        await WriteHeader(writer, "MEDIA");
+        Console.WriteLine($"- writing {media.Count} media");
+        await WriteHeader(writer, $"MEDIA ({media.Count})");
 
         foreach (var mediaItem in media)
         {
@@ -210,7 +215,8 @@ public class ImportFileWriter
 
     async Task WriteMediaFiles(StreamWriter writer, List<MediaFile> mediaFiles)
     {
-        await WriteHeader(writer, "MEDIA FILES");
+        Console.WriteLine($"- writing {mediaFiles.Count} media files");
+        await WriteHeader(writer, $"MEDIA FILES ({mediaFiles.Count})");
 
         foreach(var file in mediaFiles)
         {
@@ -239,7 +245,8 @@ public class ImportFileWriter
 
     async Task WriteCategoryMedia(StreamWriter writer, List<CategoryMedia> categoryMedias)
     {
-        await WriteHeader(writer, "CATEGORY MEDIA");
+        Console.WriteLine($"- writing {categoryMedias.Count} category media");
+        await WriteHeader(writer, $"CATEGORY MEDIA ({categoryMedias.Count})");
 
         foreach (var categoryMedia in categoryMedias)
         {
@@ -268,7 +275,8 @@ public class ImportFileWriter
 
     async Task WriteComments(StreamWriter writer, List<Comment> comments)
     {
-        await WriteHeader(writer, "COMMENTS");
+        Console.WriteLine($"- writing {comments.Count} comments");
+        await WriteHeader(writer, $"COMMENTS ({comments.Count})");
 
         foreach (var comment in comments)
         {
@@ -295,7 +303,8 @@ public class ImportFileWriter
 
     async Task WriteRatings(StreamWriter writer, List<Rating> ratings)
     {
-        await WriteHeader(writer, "RATINGS");
+        Console.WriteLine($"- writing {ratings.Count} ratings");
+        await WriteHeader(writer, $"RATINGS ({ratings.Count})");
 
         foreach (var rating in ratings)
         {
@@ -320,7 +329,8 @@ public class ImportFileWriter
 
     async Task WriteUsers(StreamWriter writer, List<User> users)
     {
-        await WriteHeader(writer, "USERS");
+        Console.WriteLine($"- writing {users.Count} users");
+        await WriteHeader(writer, $"USERS ({users.Count})");
 
         foreach (var user in users)
         {
@@ -355,7 +365,8 @@ public class ImportFileWriter
 
     async Task WriteRoles(StreamWriter writer, List<Role> roles)
     {
-        await WriteHeader(writer, "ROLES");
+        Console.WriteLine($"- writing {roles.Count} roles");
+        await WriteHeader(writer, $"ROLES ({roles.Count})");
 
         foreach (var role in roles)
         {
@@ -374,7 +385,8 @@ public class ImportFileWriter
 
     async Task WriteUserRoles(StreamWriter writer, List<UserRole> userRoles)
     {
-        await WriteHeader(writer, "USER_ROLES");
+        Console.WriteLine($"- writing {userRoles.Count} user roles");
+        await WriteHeader(writer, $"USER_ROLES ({userRoles.Count})");
 
         foreach (var userRole in userRoles)
         {
