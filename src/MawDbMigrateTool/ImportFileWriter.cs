@@ -4,33 +4,47 @@ namespace MawDbMigrateTool;
 
 public class ImportFileWriter
 {
-    readonly string _sqlFile;
+    readonly string _dir;
 
-    public ImportFileWriter(string sqlFile)
+    public ImportFileWriter(string outDir)
     {
-        _sqlFile = sqlFile;
+        _dir = outDir;
     }
 
     public async Task WriteImportFile(Db db)
     {
-        using var writer = new StreamWriter(_sqlFile);
+        PrepareOutputDirectory();
+
+        await WriteSqlScript("users.sql", async (writer) => await WriteUsers(writer, db.Users));
+        await WriteSqlScript("roles.sql", async (writer) => await WriteRoles(writer, db.Roles));
+        await WriteSqlScript("user-roles.sql", async (writer) => await WriteUserRoles(writer, db.UserRoles));
+
+        await WriteSqlScript("categories.sql", async (writer) => await WriteCategories(writer, db.Categories));
+        await WriteSqlScript("category-roles.sql", async (writer) => await WriteCategoryRoles(writer, db.CategoryRoles));
+        await WriteSqlScript("locations.sql", async (writer) => await WriteLocations(writer, db.Locations));
+        await WriteSqlScript("points-of-interest.sql", async (writer) => await WritePointsOfInterest(writer, db.PointsOfInterest));
+        await WriteSqlScript("media.sql", async (writer) => await WriteMedia(writer, db.Media));
+        await WriteSqlScript("media-files.sql", async (writer) => await WriteMediaFiles(writer, db.MediaFiles));
+        await WriteSqlScript("category-media.sql", async (writer) => await WriteCategoryMedia(writer, db.CategoryMedia));
+        await WriteSqlScript("comments.sql", async (writer) => await WriteComments(writer, db.Comments));
+        await WriteSqlScript("ratings.sql", async (writer) => await WriteRatings(writer, db.Ratings));
+    }
+
+    void PrepareOutputDirectory()
+    {
+        if (!Directory.Exists(_dir))
+        {
+            Directory.CreateDirectory(_dir);
+        }
+    }
+
+    async Task WriteSqlScript(string filename, Func<StreamWriter, Task> writeAction)
+    {
+        var outfile = Path.Combine(_dir, filename);
+        using var writer = new StreamWriter(outfile);
 
         await WriteBeginning(writer);
-
-        await WriteUsers(writer, db.Users);
-        await WriteRoles(writer, db.Roles);
-        await WriteUserRoles(writer, db.UserRoles);
-
-        await WriteCategories(writer, db.Categories);
-        await WriteCategoryRoles(writer, db.CategoryRoles);
-        await WriteLocations(writer, db.Locations);
-        await WritePointsOfInterest(writer, db.PointsOfInterest);
-        await WriteMedia(writer, db.Media);
-        await WriteMediaFiles(writer, db.MediaFiles);
-        await WriteCategoryMedia(writer, db.CategoryMedia);
-        await WriteComments(writer, db.Comments);
-        await WriteRatings(writer, db.Ratings);
-
+        await writeAction(writer);
         await WriteEnding(writer);
 
         await writer.FlushAsync();

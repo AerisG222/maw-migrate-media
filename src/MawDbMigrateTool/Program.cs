@@ -11,31 +11,31 @@ if (args.Length != 2)
 }
 
 string dbConnString = args[0];
-string sqlFile = args[1];
+string outdir = args[1];
 
 if (string.IsNullOrWhiteSpace(dbConnString))
 {
     Console.WriteLine("The database connection string cannot be null or empty.");
     Environment.Exit(2);
 }
-if (string.IsNullOrWhiteSpace(sqlFile))
+if (string.IsNullOrWhiteSpace(outdir))
 {
-    Console.WriteLine("The SQL file path cannot be null or empty.");
+    Console.WriteLine("The output path cannot be null or empty.");
     Environment.Exit(3);
 }
-if (File.Exists(sqlFile))
+if (Directory.Exists(outdir))
 {
-    Console.WriteLine($"The specified SQL file exists: {sqlFile}");
+    Console.WriteLine($"The specified output directory exists: {outdir}");
     Environment.Exit(4);
 }
 
-var exporter = new Exporter(dbConnString, sqlFile);
+var exporter = new Exporter(dbConnString, outdir);
 
 await exporter.ExportDatabase();
 
-void ShowUsage()
+static void ShowUsage()
 {
     Console.WriteLine("Usage: MawDbMigrateTool <db-conn-string> <sql-file>");
     Console.WriteLine("  <db-conn-string> - Connection string to the database.");
-    Console.WriteLine("  <sql-file> - Path to the SQL file to write, which can then be directly used by psql for import.");
+    Console.WriteLine("  <outdir> - Directory where SQL scripts should be written.");
 }

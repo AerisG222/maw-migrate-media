@@ -10,4 +10,4 @@ podman run \
     mcr.microsoft.com/dotnet/sdk:9.0 \
     dotnet src/MawDbMigrateTool/bin/Debug/net9.0/MawDbMigrateTool.dll \
         "${MAW_API_Environment__DbConnectionString}" \
-        "/data/migrate.sql"
+        "/data/_output"
