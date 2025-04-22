@@ -7,13 +7,11 @@ public static class MediaExtensions
 {
     public static Media ToTarget(
         this Photo photo,
-        Guid categoryId,
         Guid adminId
     ) {
         return new Media
         {
             Id = Guid.CreateVersion7(),
-            CategoryId = categoryId,
             MediaTypeId = MediaType.Photo.Id,
             LocationId = null,
             LocationOverrideId = null,
@@ -29,13 +27,11 @@ public static class MediaExtensions
 
     public static Media ToTarget(
         this Video video,
-        Guid categoryId,
         Guid adminId
     ) {
         return new Media
         {
             Id = Guid.CreateVersion7(),
-            CategoryId = categoryId,
             MediaTypeId = MediaType.Video.Id,
             LocationId = null,
             LocationOverrideId = null,

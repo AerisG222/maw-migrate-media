@@ -13,7 +13,6 @@ public static class CategoryExtensions
         {
             Id = Guid.CreateVersion7(),
             Name = category.Name,
-            TeaserMediaId = Guid.Empty,
             EffectiveDate = category.CreateDate,   // ?? TODO ??
             Created = category.CreateDate,
             CreatedBy = userId,
@@ -33,7 +32,6 @@ public static class CategoryExtensions
         {
             Id = Guid.CreateVersion7(),
             Name = category.Name,
-            TeaserMediaId = Guid.Empty,
             EffectiveDate = category.CreateDate,  //  ?? TODO ??
             Created = category.CreateDate,
             CreatedBy = userId,

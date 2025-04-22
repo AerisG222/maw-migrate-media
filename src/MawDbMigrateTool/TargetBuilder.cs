@@ -89,7 +89,9 @@ public class TargetBuilder
             var targetUserRole = new Models.Target.UserRole
             {
                 UserId = _userIdMap[userRole.UserId],
-                RoleId = _roleIdMap[userRole.RoleId]
+                RoleId = _roleIdMap[userRole.RoleId],
+                Created = DateTime.MinValue,
+                CreatedBy = Admin.Id
             };
             _target.UserRoles.Add(targetUserRole);
         }
@@ -152,7 +154,9 @@ public class TargetBuilder
             var targetCategoryRole = new Models.Target.CategoryRole
             {
                 CategoryId = _photoCategoryIdMap[cr.CategoryId],
-                RoleId = _roleIdMap[cr.RoleId]
+                RoleId = _roleIdMap[cr.RoleId],
+                Created = DateTime.MinValue,
+                CreatedBy = Admin.Id
             };
 
             _target.CategoryRoles.Add(targetCategoryRole);
@@ -163,7 +167,9 @@ public class TargetBuilder
             var targetCategoryRole = new Models.Target.CategoryRole
             {
                 CategoryId = _videoCategoryIdMap[cr.CategoryId],
-                RoleId = _roleIdMap[cr.RoleId]
+                RoleId = _roleIdMap[cr.RoleId],
+                Created = DateTime.MinValue,
+                CreatedBy = Admin.Id
             };
 
             _target.CategoryRoles.Add(targetCategoryRole);
@@ -188,10 +194,7 @@ public class TargetBuilder
                         .OrderBy(x => x.Id)
                         .Select(x =>
                         {
-                            var media = x.ToTarget(
-                                _photoCategoryIdMap[category.LegacyId],
-                                Admin.Id
-                            );
+                            var media = x.ToTarget(Admin.Id);
 
                             _photoIdMap.Add(x.Id, media);
 
@@ -207,10 +210,7 @@ public class TargetBuilder
                         .OrderBy(x => x.Id)
                         .Select(x =>
                         {
-                            var media = x.ToTarget(
-                                _videoCategoryIdMap[category.LegacyId],
-                                Admin.Id
-                            );
+                            var media = x.ToTarget(Admin.Id);
 
                             _videoIdMap.Add(x.Id, media);
 

@@ -48,17 +48,19 @@ public class ImportFileWriter
                 INSERT INTO media.category (
                     id,
                     name,
-                    teaser_media_id,
                     effective_date,
                     created,
-                    modified
+                    created_by,
+                    modified,
+                    modified_by
                 ) VALUES (
                     {SqlAsString(category.Id)},
                     {SqlString(category.Name)},
-                    {SqlAsString(category.TeaserMediaId)},
                     {SqlString(category.EffectiveDate.ToString("yyyy-MM-dd HH:mm:ss"))},
                     {SqlString(category.Created.ToString("yyyy-MM-dd HH:mm:ss"))},
-                    {SqlString(category.Modified.ToString("yyyy-MM-dd HH:mm:ss"))}
+                    {SqlAsString(category.CreatedBy)},
+                    {SqlString(category.Modified.ToString("yyyy-MM-dd HH:mm:ss"))},
+                    {SqlAsString(category.ModifiedBy)}
                 );
                 """);
         }
@@ -74,10 +76,14 @@ public class ImportFileWriter
                 $"""
                 INSERT INTO media.category_role (
                     category_id,
-                    role_id
+                    role_id,
+                    created,
+                    created_by
                 ) VALUES (
                     {SqlAsString(categoryRole.CategoryId)},
-                    {SqlAsString(categoryRole.RoleId)}
+                    {SqlAsString(categoryRole.RoleId)},
+                    {SqlString(categoryRole.Created.ToString("yyyy-MM-dd HH:mm:ss"))},
+                    {SqlAsString(categoryRole.CreatedBy)}
                 );
                 """);
         }
@@ -167,20 +173,22 @@ public class ImportFileWriter
                 $"""
                 INSERT INTO media.media (
                     id,
-                    category_id,
                     media_type_id,
                     location_id,
                     location_override_id,
                     created,
-                    modified
+                    created_by,
+                    modified,
+                    modified_by
                 ) VALUES (
                     {SqlAsString(mediaItem.Id)},
-                    {SqlAsString(mediaItem.CategoryId)},
                     {SqlAsString(mediaItem.MediaTypeId)},
                     {SqlAsString(mediaItem.LocationId)},
                     {SqlAsString(mediaItem.LocationOverrideId)},
                     {SqlString(mediaItem.Created.ToString("yyyy-MM-dd HH:mm:ss"))},
-                    {SqlString(mediaItem.Modified.ToString("yyyy-MM-dd HH:mm:ss"))}
+                    {SqlAsString(mediaItem.CreatedBy)},
+                    {SqlString(mediaItem.Modified.ToString("yyyy-MM-dd HH:mm:ss"))},
+                    {SqlAsString(mediaItem.ModifiedBy)}
                 );
                 """);
         }
@@ -255,15 +263,15 @@ public class ImportFileWriter
                 INSERT INTO media.comment (
                     id,
                     media_id,
-                    created_by,
                     created,
+                    created_by,
                     modified,
                     body
                 ) VALUES (
                     {SqlAsString(comment.Id)},
                     {SqlAsString(comment.MediaId)},
-                    {SqlAsString(comment.CreatedBy)},
                     {SqlString(comment.Created.ToString("yyyy-MM-dd HH:mm:ss"))},
+                    {SqlAsString(comment.CreatedBy)},
                     {SqlString(comment.Modified.ToString("yyyy-MM-dd HH:mm:ss"))},
                     {SqlString(comment.Body)}
                 );
@@ -360,10 +368,14 @@ public class ImportFileWriter
                 $"""
                 INSERT INTO media.user_role (
                     user_id,
-                    role_id
+                    role_id,
+                    created,
+                    created_by
                 ) VALUES (
                     {SqlAsString(userRole.UserId)},
-                    {SqlAsString(userRole.RoleId)}
+                    {SqlAsString(userRole.RoleId)},
+                    {SqlString(userRole.Created.ToString("yyyy-MM-dd HH:mm:ss"))},
+                    {SqlAsString(userRole.CreatedBy)}
                 );
                 """);
         }
