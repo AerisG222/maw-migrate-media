@@ -28,6 +28,8 @@ public class ImportFileWriter
         await WriteSqlScript("category-media.sql", async (writer) => await WriteCategoryMedia(writer, db.CategoryMedia));
         await WriteSqlScript("comments.sql", async (writer) => await WriteComments(writer, db.Comments));
         await WriteSqlScript("ratings.sql", async (writer) => await WriteRatings(writer, db.Ratings));
+
+        await WriteRunnerScript();
     }
 
     void PrepareOutputDirectory()
@@ -36,6 +38,62 @@ public class ImportFileWriter
         {
             Directory.CreateDirectory(_dir);
         }
+    }
+
+    async Task WriteRunnerScript()
+    {
+        var outfile = Path.Combine(_dir, "import.sh");
+        using var writer = new StreamWriter(outfile);
+
+        await writer.WriteLineAsync(
+            """
+            #!/bin/bash
+            POD=$1         # dev-api-pod
+            PGPORT=$2      # 5432
+            ENVPGDATA=$3   # /home/mmorano/maw-api-dev/data/pgpwd
+
+            """);
+
+        await WriteRunScript(writer, "users.sql");
+        await WriteRunScript(writer, "roles.sql");
+        await WriteRunScript(writer, "user-roles.sql");
+
+        await WriteRunScript(writer, "categories.sql");
+        await WriteRunScript(writer, "category-roles.sql");
+        await WriteRunScript(writer, "locations.sql");
+        await WriteRunScript(writer, "points-of-interest.sql");
+        await WriteRunScript(writer, "media.sql");
+        await WriteRunScript(writer, "media-files.sql");
+        await WriteRunScript(writer, "category-media.sql");
+        await WriteRunScript(writer, "comments.sql");
+        await WriteRunScript(writer, "ratings.sql");
+    }
+
+    async Task WriteRunScript(StreamWriter writer, string filename)
+    {
+        var localPath = _dir.Substring(Path.GetDirectoryName(_dir)!.Length + 1);
+        var containerDir = "/scripts";
+        var file = Path.Combine(containerDir, filename);
+
+        await writer.WriteLineAsync(
+            $$"""
+            podman run -it --rm \
+                --pod "${POD}" \
+                --name pg_import \
+                --security-opt label=disable \
+                --env "POSTGRES_PASSWORD_FILE=/secrets/psql-postgres" \
+                --volume "./:{{containerDir}}" \
+                --volume "${ENVPGDATA}:/secrets" \
+                docker.io/library/postgres:17 \
+                    psql \
+                    --host localhost \
+                    --port "${PGPORT}" \
+                    --username postgres \
+                    --dbname maw_media \
+                    --file "{{file}}"
+            """);
+
+        await writer.WriteLineAsync();
     }
 
     async Task WriteSqlScript(string filename, Func<StreamWriter, Task> writeAction)

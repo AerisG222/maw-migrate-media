@@ -6,11 +6,11 @@ public class Exporter
     readonly TargetBuilder _targetBuilder;
     readonly ImportFileWriter _importWriter;
 
-    public Exporter(string dbConnString, string sqlFile)
+    public Exporter(string dbConnString, string outDir)
     {
         _dbReader = new DbReader(dbConnString);
         _targetBuilder = new TargetBuilder();
-        _importWriter = new ImportFileWriter(sqlFile);
+        _importWriter = new ImportFileWriter(outDir);
     }
 
     public async Task ExportDatabase()
