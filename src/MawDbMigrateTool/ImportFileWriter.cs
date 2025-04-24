@@ -483,7 +483,7 @@ public class ImportFileWriter
             END
             $$
 
-            \\q
+            \q
             """
         );
     }

@@ -66,6 +66,11 @@ public class TargetBuilder
     {
         foreach (var user in users)
         {
+            if(string.IsNullOrEmpty(user.Email))
+            {
+                user.Email = $"{user.Username}@example.com";
+            }
+
             var targetUser = user.ToTarget();
             _userIdMap.Add(user.Id, targetUser.Id);
             _target.Users.Add(targetUser);
