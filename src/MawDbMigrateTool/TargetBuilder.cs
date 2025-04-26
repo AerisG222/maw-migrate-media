@@ -12,8 +12,7 @@ public class TargetBuilder
     readonly Dictionary<int, Models.Target.Media> _photoIdMap = [];
     readonly Dictionary<short, Guid> _videoCategoryIdMap = [];
     readonly Dictionary<int, Models.Target.Media> _videoIdMap = [];
-
-    readonly Dictionary<string, Guid> _locationIdMap = [];
+    readonly Dictionary<string, Models.Target.Location> _locationMap = [];
 
     Models.Target.User? _admin = null;
 
@@ -309,6 +308,22 @@ public class TargetBuilder
         return $"{latitude:f6},{longitude:f6}";
     }
 
+    bool ShouldAddLocationKeyLookup(string key) => !(string.IsNullOrEmpty(key) || _locationMap.ContainsKey(key));
+    bool IsValidLocationKey(string key) => !string.IsNullOrEmpty(key) && _locationMap.ContainsKey(key);
+    Models.Target.Location CreateLocation(double latitude, double longitude)
+    {
+        var location = new Models.Target.Location
+        {
+            Id = Guid.CreateVersion7(),
+            Latitude = latitude,
+            Longitude = longitude
+        };
+
+        _target.Locations.Add(location);
+
+        return location;
+    }
+
     void BuildLocationLookup(
         IEnumerable<Photo> photos,
         IEnumerable<PhotoGpsOverride> photoGpsOverrides,
@@ -318,14 +333,11 @@ public class TargetBuilder
     {
         foreach (var photo in photos)
         {
-            if (photo.GpsLatitude != null && photo.GpsLongitude != null)
-            {
-                var key = BuildLocationKey(photo.GpsLatitude, photo.GpsLongitude);
+            var key = BuildLocationKey(photo.GpsLatitude, photo.GpsLongitude);
 
-                if (!_locationIdMap.ContainsKey(key))
-                {
-                    _locationIdMap.Add(key, Guid.CreateVersion7());
-                }
+            if (ShouldAddLocationKeyLookup(key))
+            {
+                _locationMap.Add(key, CreateLocation(photo.GpsLatitude!.Value, photo.GpsLongitude!.Value));
             }
         }
 
@@ -333,22 +345,19 @@ public class TargetBuilder
         {
             var key = BuildLocationKey(photo.Latitude, photo.Longitude);
 
-            if (!_locationIdMap.ContainsKey(key))
+            if (ShouldAddLocationKeyLookup(key))
             {
-                _locationIdMap.Add(key, Guid.CreateVersion7());
+                _locationMap.Add(key, CreateLocation(photo.Latitude, photo.Longitude));
             }
         }
 
         foreach (var video in videos)
         {
-            if (video.GpsLatitude != null && video.GpsLongitude != null)
-            {
-                var key = BuildLocationKey(video.GpsLatitude, video.GpsLongitude);
+            var key = BuildLocationKey(video.GpsLatitude, video.GpsLongitude);
 
-                if (!_locationIdMap.ContainsKey(key))
-                {
-                    _locationIdMap.Add(key, Guid.CreateVersion7());
-                }
+            if (ShouldAddLocationKeyLookup(key))
+            {
+                _locationMap.Add(key, CreateLocation(video.GpsLatitude!.Value, video.GpsLongitude!.Value));
             }
         }
 
@@ -356,9 +365,9 @@ public class TargetBuilder
         {
             var key = BuildLocationKey(video.Latitude, video.Longitude);
 
-            if (!_locationIdMap.ContainsKey(key))
+            if (ShouldAddLocationKeyLookup(key))
             {
-                _locationIdMap.Add(key, Guid.CreateVersion7());
+                _locationMap.Add(key, CreateLocation(video.Latitude, video.Longitude));
             }
         }
     }
@@ -380,31 +389,21 @@ public class TargetBuilder
             {
                 var gpsOverride = photoGpsOverrides
                     .Single(x => x.PhotoId == reverseGeocode.PhotoId);
+                var locationKey = BuildLocationKey(gpsOverride.Latitude, gpsOverride.Longitude);
+                var location = _locationMap[locationKey];
 
-                var targetLocation = reverseGeocode.ToTarget(
-                    _locationIdMap[BuildLocationKey(gpsOverride.Latitude, gpsOverride.Longitude)],
-                    gpsOverride.Latitude,
-                    gpsOverride.Longitude
-                );
-
-                targetMedia.LocationOverrideId = targetLocation.Id;
-
-                _target.Locations.Add(targetLocation);
+                reverseGeocode.Populate(location);
+                targetMedia.LocationOverrideId = location.Id;
             }
             else
             {
                 var photo = photos
                     .Single(x => x.Id == reverseGeocode.PhotoId);
+                var locationKey = BuildLocationKey(photo.GpsLatitude, photo.GpsLongitude);
+                var location = _locationMap[locationKey];
 
-                var targetLocation = reverseGeocode.ToTarget(
-                    _locationIdMap[BuildLocationKey(photo.GpsLatitude, photo.GpsLongitude)],
-                    photo.GpsLatitude!.Value,
-                    photo.GpsLongitude!.Value
-                );
-
-                targetMedia.LocationId = targetLocation.Id;
-
-                _target.Locations.Add(targetLocation);
+                reverseGeocode.Populate(location);
+                targetMedia.LocationId = location.Id;
             }
         }
 
@@ -416,31 +415,21 @@ public class TargetBuilder
             {
                 var gpsOverride = videoGpsOverrides
                     .Single(x => x.VideoId == reverseGeocode.VideoId);
+                var locationKey = BuildLocationKey(gpsOverride.Latitude, gpsOverride.Longitude);
+                var location = _locationMap[locationKey];
 
-                var targetLocation = reverseGeocode.ToTarget(
-                    _locationIdMap[BuildLocationKey(gpsOverride.Latitude, gpsOverride.Longitude)],
-                    gpsOverride.Latitude,
-                    gpsOverride.Longitude
-                );
-
-                targetMedia.LocationOverrideId = targetLocation.Id;
-
-                _target.Locations.Add(targetLocation);
+                reverseGeocode.Populate(location);
+                targetMedia.LocationOverrideId = location.Id;
             }
             else
             {
                 var video = videos
                     .Single(x => x.Id == reverseGeocode.VideoId);
+                var locationKey = BuildLocationKey(video.GpsLatitude, video.GpsLongitude);
+                var location = _locationMap[locationKey];
 
-                var targetLocation = reverseGeocode.ToTarget(
-                    _locationIdMap[BuildLocationKey(video.GpsLatitude, video.GpsLongitude)],
-                    video.GpsLatitude!.Value,
-                    video.GpsLongitude!.Value
-                );
-
-                targetMedia.LocationId = targetLocation.Id;
-
-                _target.Locations.Add(targetLocation);
+                reverseGeocode.Populate(location);
+                targetMedia.LocationId = location.Id;
             }
         }
     }
@@ -553,7 +542,7 @@ public class TargetBuilder
             var locationKey = BuildLocationKey(photo.GpsLatitude, photo.GpsLongitude);
             var media = _photoIdMap[photo.Id];
 
-            media.LocationId = string.IsNullOrWhiteSpace(locationKey) ? null : _locationIdMap[locationKey];
+            media.LocationId = string.IsNullOrWhiteSpace(locationKey) ? null : _locationMap[locationKey].Id;
         }
 
         foreach (var gpsOverride in photoGpsOverrides)
@@ -561,7 +550,7 @@ public class TargetBuilder
             var locationKey = BuildLocationKey(gpsOverride.Latitude, gpsOverride.Longitude);
             var media = _photoIdMap[gpsOverride.PhotoId];
 
-            media.LocationOverrideId = string.IsNullOrWhiteSpace(locationKey) ? null : _locationIdMap[locationKey];
+            media.LocationOverrideId = string.IsNullOrWhiteSpace(locationKey) ? null : _locationMap[locationKey].Id;
         }
 
         var gpsVideos = videos
@@ -572,7 +561,7 @@ public class TargetBuilder
             var locationKey = BuildLocationKey(video.GpsLatitude, video.GpsLongitude);
             var media = _videoIdMap[video.Id];
 
-            media.LocationId = string.IsNullOrWhiteSpace(locationKey) ? null : _locationIdMap[locationKey];
+            media.LocationId = string.IsNullOrWhiteSpace(locationKey) ? null : _locationMap[locationKey].Id;
         }
 
         foreach (var gpsOverride in videoGpsOverrides)
@@ -580,7 +569,7 @@ public class TargetBuilder
             var locationKey = BuildLocationKey(gpsOverride.Latitude, gpsOverride.Longitude);
             var media = _videoIdMap[gpsOverride.VideoId];
 
-            media.LocationOverrideId = string.IsNullOrWhiteSpace(locationKey) ? null : _locationIdMap[locationKey];
+            media.LocationOverrideId = string.IsNullOrWhiteSpace(locationKey) ? null : _locationMap[locationKey].Id;
         }
     }
 

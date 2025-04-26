@@ -5,63 +5,47 @@ namespace MawDbMigrateTool.Models.Extensions;
 
 public static class ReverseGeocodeExtensions
 {
-    public static Location ToTarget(
+    public static void Populate(
         this PhotoReverseGeocode reverseGeocode,
-        Guid id,
-        double latitude,
-        double longitude
+        Location location
     ) {
-        return new Location
-        {
-            Id = id,
-            Latitude = latitude,
-            Longitude = longitude,
-            LookupDate = DateTime.MinValue,
-            FormattedAddress = reverseGeocode.FormattedAddress,
-            AdministrativeAreaLevel1 = reverseGeocode.AdministrativeAreaLevel1,
-            AdministrativeAreaLevel2 = reverseGeocode.AdministrativeAreaLevel2,
-            AdministrativeAreaLevel3 = reverseGeocode.AdministrativeAreaLevel3,
-            Country = reverseGeocode.Country,
-            Locality = reverseGeocode.Locality,
-            Neighborhood = reverseGeocode.Neighborhood,
-            SubLocalityLevel1 = reverseGeocode.SubLocalityLevel1,
-            SubLocalityLevel2 = reverseGeocode.SubLocalityLevel2,
-            PostalCode = reverseGeocode.PostalCode,
-            PostalCodeSuffix = reverseGeocode.PostalCodeSuffix,
-            Premise = reverseGeocode.Premise,
-            Route = reverseGeocode.Route,
-            StreetNumber = reverseGeocode.StreetNumber,
-            SubPremise = reverseGeocode.SubPremise
-        };
+        location.LookupDate = DateTime.MinValue;
+        location.FormattedAddress = reverseGeocode.FormattedAddress;
+        location.AdministrativeAreaLevel1 = reverseGeocode.AdministrativeAreaLevel1;
+        location.AdministrativeAreaLevel2 = reverseGeocode.AdministrativeAreaLevel2;
+        location.AdministrativeAreaLevel3 = reverseGeocode.AdministrativeAreaLevel3;
+        location.Country = reverseGeocode.Country;
+        location.Locality = reverseGeocode.Locality;
+        location.Neighborhood = reverseGeocode.Neighborhood;
+        location.SubLocalityLevel1 = reverseGeocode.SubLocalityLevel1;
+        location.SubLocalityLevel2 = reverseGeocode.SubLocalityLevel2;
+        location.PostalCode = reverseGeocode.PostalCode;
+        location.PostalCodeSuffix = reverseGeocode.PostalCodeSuffix;
+        location.Premise = reverseGeocode.Premise;
+        location.Route = reverseGeocode.Route;
+        location.StreetNumber = reverseGeocode.StreetNumber;
+        location.SubPremise = reverseGeocode.SubPremise;
     }
 
-    public static Location ToTarget(
+    public static void Populate(
         this VideoReverseGeocode reverseGeocode,
-        Guid id,
-        double latitude,
-        double longitude
+        Location location
     ) {
-        return new Location
-        {
-            Id = id,
-            Latitude = latitude,
-            Longitude = longitude,
-            LookupDate = DateTime.MinValue,
-            FormattedAddress = reverseGeocode.FormattedAddress,
-            AdministrativeAreaLevel1 = reverseGeocode.AdministrativeAreaLevel1,
-            AdministrativeAreaLevel2 = reverseGeocode.AdministrativeAreaLevel2,
-            AdministrativeAreaLevel3 = reverseGeocode.AdministrativeAreaLevel3,
-            Country = reverseGeocode.Country,
-            Locality = reverseGeocode.Locality,
-            Neighborhood = reverseGeocode.Neighborhood,
-            SubLocalityLevel1 = reverseGeocode.SubLocalityLevel1,
-            SubLocalityLevel2 = reverseGeocode.SubLocalityLevel2,
-            PostalCode = reverseGeocode.PostalCode,
-            PostalCodeSuffix = reverseGeocode.PostalCodeSuffix,
-            Premise = reverseGeocode.Premise,
-            Route = reverseGeocode.Route,
-            StreetNumber = reverseGeocode.StreetNumber,
-            SubPremise = reverseGeocode.SubPremise
-        };
+        location.LookupDate = DateTime.MinValue;
+        location.FormattedAddress = reverseGeocode.FormattedAddress;
+        location.AdministrativeAreaLevel1 = reverseGeocode.AdministrativeAreaLevel1;
+        location.AdministrativeAreaLevel2 = reverseGeocode.AdministrativeAreaLevel2;
+        location.AdministrativeAreaLevel3 = reverseGeocode.AdministrativeAreaLevel3;
+        location.Country = reverseGeocode.Country;
+        location.Locality = reverseGeocode.Locality;
+        location.Neighborhood = reverseGeocode.Neighborhood;
+        location.SubLocalityLevel1 = reverseGeocode.SubLocalityLevel1;
+        location.SubLocalityLevel2 = reverseGeocode.SubLocalityLevel2;
+        location.PostalCode = reverseGeocode.PostalCode;
+        location.PostalCodeSuffix = reverseGeocode.PostalCodeSuffix;
+        location.Premise = reverseGeocode.Premise;
+        location.Route = reverseGeocode.Route;
+        location.StreetNumber = reverseGeocode.StreetNumber;
+        location.SubPremise = reverseGeocode.SubPremise;
     }
 }
