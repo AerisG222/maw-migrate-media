@@ -1,0 +1,104 @@
+using System.Globalization;
+using CsvHelper;
+
+namespace MawFileMover;
+
+public class Mover
+{
+    private readonly DirectoryInfo _origDir;
+    private readonly DirectoryInfo _destDir;
+    private readonly string _mappingFile;
+
+    public Mover(DirectoryInfo origDir, DirectoryInfo destDir, string mappingFile)
+    {
+        _origDir = origDir;
+        _destDir = destDir;
+        _mappingFile = mappingFile;
+    }
+
+    public async Task MoveFiles()
+    {
+        var imageSpecs = MoveImages();
+        var videoSpecs = MoveVideos();
+
+        var moveSpecs = imageSpecs.Concat(videoSpecs);
+
+        await WriteMappingFile(moveSpecs);
+    }
+
+    IEnumerable<MoveSpec> MoveImages()
+    {
+        return MoveOriginalMedia("images", ["src", "lg"]);
+    }
+
+    IEnumerable<MoveSpec> MoveVideos()
+    {
+        var renames = new Dictionary<string, string>
+        {
+            { "raw", "src" }
+        };
+
+        return MoveOriginalMedia("movies", ["raw"], renames);
+    }
+
+    IEnumerable<MoveSpec> MoveOriginalMedia(
+        string origMediaDirName,
+        string[] dirsToKeep,
+        Dictionary<string, string>? renameMap = null
+    ) {
+        var dir = new DirectoryInfo(Path.Combine(_origDir.FullName, origMediaDirName));
+
+        if(!dir.Exists)
+        {
+            throw new DirectoryNotFoundException($"The directory {dir.FullName} does not exist.");
+        }
+
+        var files = dir.EnumerateFiles("*", SearchOption.AllDirectories);
+
+        foreach (var file in files)
+        {
+            if (dirsToKeep.Contains(file.Directory!.Name))
+            {
+                var destFile = BuildFileDest(dir, file, renameMap);
+
+                // TODO: perform move
+
+                // only log src files in the movespec list - all scaled media will be in diff dirs...
+                if (destFile.Directory!.Name == "src")
+                {
+                    yield return new MoveSpec
+                    {
+                        Src = file.FullName,
+                        Dst = destFile.FullName
+                    };
+                }
+            }
+        }
+    }
+
+    FileInfo BuildFileDest(DirectoryInfo origRootDir, FileInfo file, Dictionary<string, string>? renameMap = null)
+    {
+        string destDirName = file.Directory!.FullName;
+
+        if (renameMap != null && renameMap.TryGetValue(file.Directory.Name, out string? value))
+        {
+            destDirName = Path.Combine(file.Directory.Parent!.FullName, value);
+        }
+
+        // prefer dashes to underscores (we shouldn't have any spaces, but lets be safe) for directory names
+        destDirName = destDirName
+            .Replace(origRootDir.FullName, _destDir.FullName)
+            .Replace(" ", "-")
+            .Replace("_", "-");
+
+        return new FileInfo(Path.Combine(destDirName, file.Name));
+    }
+
+    async Task WriteMappingFile(IEnumerable<MoveSpec> moveSpecs)
+    {
+        using var writer = new StreamWriter(_mappingFile);
+        using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
+
+        await csv.WriteRecordsAsync(moveSpecs);
+    }
+}
