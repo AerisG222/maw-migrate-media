@@ -5,9 +5,10 @@ namespace MawFileMover;
 
 public class Mover
 {
-    private readonly DirectoryInfo _origDir;
-    private readonly DirectoryInfo _destDir;
-    private readonly string _mappingFile;
+    readonly DirectoryInfo _origDir;
+    readonly DirectoryInfo _destDir;
+    readonly string _mappingFile;
+    readonly Scaler _scaler = new();
 
     public Mover(DirectoryInfo origDir, DirectoryInfo destDir, string mappingFile)
     {
@@ -61,7 +62,8 @@ public class Mover
             {
                 var destFile = BuildFileDest(dir, file, renameMap);
 
-                // TODO: perform move
+                Move(file, destFile);
+                Scale(file, destFile);
 
                 // only log src files in the movespec list - all scaled media will be in diff dirs...
                 if (destFile.Directory!.Name == "src")
@@ -73,6 +75,32 @@ public class Mover
                     };
                 }
             }
+        }
+    }
+
+    static void Move(FileInfo src, FileInfo dst)
+    {
+        if (!dst.Directory!.Exists)
+        {
+            dst.Directory.Create();
+        }
+
+        src.MoveTo(dst.FullName);
+    }
+
+    void Scale(FileInfo src, FileInfo dst)
+    {
+        if (src.Directory!.Name == "raw")
+        {
+            _scaler.ScaleVideo(dst);
+        }
+
+        // this migration tool does not attempt to scale photos from source as that process is more complex and allows
+        // for manipulations through things like rawtherapee pp3 files.  We only scale the lg so we retain overall look of image
+        // by by scaling to avif, file size will be roughly 50%.
+        if (src.Directory.Name == "lg")
+        {
+            _scaler.ScaleImage(dst);
         }
     }
 
