@@ -117,10 +117,13 @@ public class Scaler
 
         if (scale.IsPreview)
         {
-            // scale video to fit area
+            // scale video to fit area (full height or width, with borders as necessary)
+            //"-vf", $"\"scale={scale.Width}:{scale.Height}:force_original_aspect_ratio=decrease,pad={scale.Width}:{scale.Height}:(ow-iw)/2:(oh-ih)/2\"",
+
+            // scale video to fit area (cropped to fit)
             args.AddRange([
                 "-an",
-                "-vf", $"\"scale={scale.Width}:{scale.Height}:force_original_aspect_ratio=decrease,pad={scale.Width}:{scale.Height}:(ow-iw)/2:(oh-ih)/2\"",
+                "-vf", $"\"scale=(iw*sar)*max({scale.Width}/(iw*sar)\\,{scale.Height}/ih):ih*max({scale.Width}/(iw*sar)\\,{scale.Height}/ih), crop={scale.Width}:{scale.Height}\"",
                 "-r", "24"
             ]);
         }
