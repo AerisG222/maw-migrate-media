@@ -60,17 +60,19 @@ public class Mover
         {
             if (dirsToKeep.Contains(file.Directory!.Name))
             {
+                // get another ref to this file that won't change due to the move
+                var origFile = new FileInfo(file.FullName);
                 var destFile = BuildFileDest(dir, file, renameMap);
 
                 Move(file, destFile);
-                Scale(file, destFile);
+                Scale(origFile, file, destFile);
 
                 // only log src files in the movespec list - all scaled media will be in diff dirs...
                 if (destFile.Directory!.Name == "src")
                 {
                     yield return new MoveSpec
                     {
-                        Src = file.FullName,
+                        Src = origFile.FullName,
                         Dst = destFile.FullName
                     };
                 }
@@ -88,9 +90,9 @@ public class Mover
         src.MoveTo(dst.FullName);
     }
 
-    void Scale(FileInfo src, FileInfo dst)
+    void Scale(FileInfo origFile, FileInfo src, FileInfo dst)
     {
-        if (src.Directory!.Name == "raw")
+        if (origFile.Directory!.Name == "raw")
         {
             _scaler.ScaleVideo(dst);
         }
@@ -98,7 +100,7 @@ public class Mover
         // this migration tool does not attempt to scale photos from source as that process is more complex and allows
         // for manipulations through things like rawtherapee pp3 files.  We only scale the lg so we retain overall look of image
         // by by scaling to avif, file size will be roughly 50%.
-        if (src.Directory.Name == "lg")
+        if (origFile.Directory.Name == "lg")
         {
             _scaler.ScaleImage(dst);
         }

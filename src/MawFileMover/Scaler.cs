@@ -4,7 +4,7 @@ namespace MawFileMover;
 
 public class Scaler
 {
-    List<Scale> _scales = [
+    readonly List<Scale> _scales = [
         new ("qqvg", 160, 120, false),
         new ("qqvg-fill", 160, 120, true),
         new ("qvg", 320, 240, false),
@@ -47,17 +47,43 @@ public class Scaler
 
     public void ScaleVideo(FileInfo src)
     {
-        // todo
+        Parallel.ForEach(_scales, scale =>
+        {
+            var dst = new FileInfo(
+                Path.Combine(src.Directory!.Parent!.FullName, scale.Code, $"{Path.GetFileNameWithoutExtension(src.Name)}.mp4")
+            );
+
+            SafeCreateDir(dst.DirectoryName!);
+
+            var psi = new ProcessStartInfo
+            {
+                FileName = "ffmpeg",
+                Arguments = GetFfmpegArgs(src.FullName, dst.FullName, scale),
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            using var process = new Process
+            {
+                StartInfo = psi
+            };
+
+            process.Start();
+            process.WaitForExit();
+        });
     }
 
-    string GetImageMagickArgs(string src, string dst, Scale scale)
+    // https://usage.imagemagick.org/resize/
+    static string GetImageMagickArgs(string src, string dst, Scale scale)
     {
         List<string> args = [
             $"\"{src}\"",
             "-colorspace", "RGB"
         ];
 
-        if (scale.FillsDimensions)
+        if (scale.IsPreview)
         {
             args.AddRange([
                 "-resize", $"{scale.Width}x{scale.Height}^",
@@ -81,7 +107,42 @@ public class Scaler
         return string.Join(" ", args);
     }
 
-    void SafeCreateDir(string dir)
+    // https://trac.ffmpeg.org/wiki/Encode/AV1#SVT-AV1
+    // https://www.ffmpeg.org/ffmpeg-all.html#scale-1
+    static string GetFfmpegArgs(string src, string dst, Scale scale)
+    {
+        List<string> args = [
+            "-i", $"\"{src}\""
+        ];
+
+        if (scale.IsPreview)
+        {
+            // scale video to fit area
+            args.AddRange([
+                "-an",
+                "-vf", $"\"scale={scale.Width}:{scale.Height}:force_original_aspect_ratio=decrease,pad={scale.Width}:{scale.Height}:(ow-iw)/2:(oh-ih)/2\"",
+                "-r", "24"
+            ]);
+        }
+        else
+        {
+            args.AddRange([
+                "-c:a", "aac",
+                "-b:a", "128k",
+                "-vf", $"\"scale={scale.Width}:{scale.Height}:force_original_aspect_ratio=decrease:force_divisible_by=2\""
+            ]);
+        }
+
+        args.AddRange([
+            "-c:v", "libsvtav1",
+            "-movflags", "+faststart",
+            $"\"{dst}\""
+        ]);
+
+        return string.Join(" ", args);
+    }
+
+    static void SafeCreateDir(string dir)
     {
         if (!Directory.Exists(dir))
         {
