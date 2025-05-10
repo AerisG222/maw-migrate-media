@@ -29,7 +29,7 @@ public class Mover
 
     IEnumerable<MoveSpec> MoveImages()
     {
-        return MoveOriginalMedia("images", ["src", "lg"]);
+        return MoveOriginalMedia("images", ["src", "lg"]).ToBlockingEnumerable();
     }
 
     IEnumerable<MoveSpec> MoveVideos()
@@ -39,10 +39,10 @@ public class Mover
             { "raw", "src" }
         };
 
-        return MoveOriginalMedia("movies", ["raw"], renames);
+        return MoveOriginalMedia("movies", ["raw"], renames).ToBlockingEnumerable();
     }
 
-    IEnumerable<MoveSpec> MoveOriginalMedia(
+    async IAsyncEnumerable<MoveSpec> MoveOriginalMedia(
         string origMediaDirName,
         string[] dirsToKeep,
         Dictionary<string, string>? renameMap = null
@@ -65,7 +65,7 @@ public class Mover
                 var destFile = BuildFileDest(dir, file, renameMap);
 
                 Move(file, destFile);
-                Scale(origFile, file, destFile);
+                await Scale(origFile, file, destFile);
 
                 // only log src files in the movespec list - all scaled media will be in diff dirs...
                 if (destFile.Directory!.Name == "src")
@@ -90,11 +90,11 @@ public class Mover
         src.MoveTo(dst.FullName);
     }
 
-    void Scale(FileInfo origFile, FileInfo src, FileInfo dst)
+    async Task Scale(FileInfo origFile, FileInfo src, FileInfo dst)
     {
         if (origFile.Directory!.Name == "raw")
         {
-            _scaler.ScaleVideo(dst);
+            await _scaler.ScaleVideo(dst);
         }
 
         // this migration tool does not attempt to scale photos from source as that process is more complex and allows
@@ -102,7 +102,7 @@ public class Mover
         // by by scaling to avif, file size will be roughly 50%.
         if (origFile.Directory.Name == "lg")
         {
-            _scaler.ScaleImage(dst);
+            await _scaler.ScaleImage(dst);
         }
     }
 

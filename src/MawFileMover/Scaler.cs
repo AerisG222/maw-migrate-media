@@ -4,6 +4,8 @@ namespace MawFileMover;
 
 public class Scaler
 {
+    object _lockObj = new();
+    readonly Inspector _inspector = new();
     readonly List<Scale> _scales = [
         new ("qqvg", 160, 120, false),
         new ("qqvg-fill", 160, 120, true),
@@ -15,10 +17,22 @@ public class Scaler
         new ("4k", 3840, 2160, false)
     ];
 
-    public void ScaleImage(FileInfo src)
+    public async Task ScaleImage(FileInfo src)
     {
-        Parallel.ForEach(_scales, scale =>
+        var (srcWidth, srcHeight) = await _inspector.QueryDimensions(src.FullName);
+
+        await Parallel.ForEachAsync(_scales, async (scale, token) =>
         {
+            if (!ShouldScale(srcWidth, srcHeight, scale))
+            {
+                lock (_lockObj)
+                {
+                    Console.WriteLine($"  - not scaling {src.Name} to {scale}");
+                }
+
+                return;
+            }
+
             var dst = new FileInfo(
                 Path.Combine(src.Directory!.Parent!.FullName, scale.Code, $"{Path.GetFileNameWithoutExtension(src.Name)}.avif")
             );
@@ -41,14 +55,26 @@ public class Scaler
             };
 
             process.Start();
-            process.WaitForExit();
+            await process.WaitForExitAsync(token);
         });
     }
 
-    public void ScaleVideo(FileInfo src)
+    public async Task ScaleVideo(FileInfo src)
     {
-        Parallel.ForEach(_scales, scale =>
+        var (srcWidth, srcHeight) = await _inspector.QueryDimensions(src.FullName);
+
+        await Parallel.ForEachAsync(_scales, async (scale, token) =>
         {
+            if (!ShouldScale(srcWidth, srcHeight, scale))
+            {
+                lock (_lockObj)
+                {
+                    Console.WriteLine($"  - not scaling {src.Name} to {scale}");
+                }
+
+                return;
+            }
+
             var dst = new FileInfo(
                 Path.Combine(src.Directory!.Parent!.FullName, scale.Code, $"{Path.GetFileNameWithoutExtension(src.Name)}.mp4")
             );
@@ -71,7 +97,7 @@ public class Scaler
             };
 
             process.Start();
-            process.WaitForExit();
+            await process.WaitForExitAsync(token);
         });
     }
 
@@ -143,6 +169,11 @@ public class Scaler
         ]);
 
         return string.Join(" ", args);
+    }
+
+    static bool ShouldScale(int width, int height, Scale scale)
+    {
+        return width >= scale.Width || height >= scale.Height;
     }
 
     static void SafeCreateDir(string dir)
