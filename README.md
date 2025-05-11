@@ -6,7 +6,7 @@ The following tools will help manage different parts of the restructuring of the
 
 Silly little tool to migrate data to new schema.
 
-## MawFileMover
+## MawMediaMigrate
 
 Tool to move / rename / resize files to the new structure and sizes.
 Will likely rescale images to new dimensions in avif

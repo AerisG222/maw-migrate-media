@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/src/MawDbMigrateTool/MawDbMigrateTool.csproj",
+                "${workspaceFolder}/src/MawDbMigrate/MawDbMigrate.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],

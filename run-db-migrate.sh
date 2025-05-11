@@ -8,6 +8,6 @@ podman run \
     --workdir /data \
     --security-opt label=disable \
     mcr.microsoft.com/dotnet/sdk:9.0 \
-    dotnet src/MawDbMigrateTool/bin/Debug/net9.0/MawDbMigrateTool.dll \
+    dotnet src/MawDbMigrate/bin/Debug/net9.0/MawDbMigrate.dll \
         "${MAW_API_Environment__DbConnectionString}" \
         "/data/_output"
