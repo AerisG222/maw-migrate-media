@@ -9,6 +9,7 @@ public class Mover
     readonly DirectoryInfo _destDir;
     readonly string _mappingFile;
     readonly Scaler _scaler = new();
+    readonly ExifExporter _exifExporter = new ExifExporter();
 
     public Mover(DirectoryInfo origDir, DirectoryInfo destDir, string mappingFile)
     {
@@ -65,7 +66,8 @@ public class Mover
                 var destFile = BuildFileDest(dir, file, renameMap);
 
                 Move(file, destFile);
-                await Scale(origFile, file, destFile);
+                await Scale(origFile, destFile);
+                await ExportExif(origFile, destFile);
 
                 // only log src files in the movespec list - all scaled media will be in diff dirs...
                 if (destFile.Directory!.Name == "src")
@@ -90,7 +92,7 @@ public class Mover
         src.MoveTo(dst.FullName);
     }
 
-    async Task Scale(FileInfo origFile, FileInfo src, FileInfo dst)
+    async Task Scale(FileInfo origFile, FileInfo dst)
     {
         if (origFile.Directory!.Name == "raw")
         {
@@ -103,6 +105,14 @@ public class Mover
         if (origFile.Directory.Name == "lg")
         {
             await _scaler.ScaleImage(dst);
+        }
+    }
+
+    async Task ExportExif(FileInfo origFile, FileInfo dst)
+    {
+        if (origFile.Directory!.Name == "raw" || origFile.Directory!.Name == "src")
+        {
+            await _exifExporter.ExportAsync(dst.FullName);
         }
     }
 

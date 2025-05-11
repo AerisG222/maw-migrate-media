@@ -1,8 +1,8 @@
 using System.Diagnostics;
 
-namespace MawExifExport;
+namespace MawFileMover;
 
-class Exporter
+class ExifExporter
 {
     public async Task ExportAsync(string mediaFile)
     {
