@@ -4,16 +4,18 @@ namespace MawMediaMigrate;
 
 class ExifExporter
 {
-    public async Task ExportAsync(string mediaFile)
+    public async Task<string?> ExportAsync(string mediaFile)
     {
         if (string.IsNullOrWhiteSpace(mediaFile))
         {
             throw new ArgumentException("The media file cannot be null or empty.", nameof(mediaFile));
         }
 
-        if(File.Exists($"{mediaFile}.json"))
+        var outfile = $"{mediaFile}.json";
+
+        if (File.Exists(outfile))
         {
-            return;
+            return outfile;
         }
 
         var arguments = $"-json -quiet -groupHeadings -long -textOut \"%d%f.%e.json\" \"{mediaFile}\"";
@@ -30,5 +32,12 @@ class ExifExporter
         process.Start();
 
         await process.WaitForExitAsync();
+
+        if (process.ExitCode == 0)
+        {
+            return outfile;
+        }
+
+        return null;
     }
 }

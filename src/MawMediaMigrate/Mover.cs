@@ -66,8 +66,8 @@ public class Mover
                 var destFile = BuildFileDest(dir, file, renameMap);
 
                 Move(file, destFile);
-                await Scale(origFile, destFile);
-                await ExportExif(origFile, destFile);
+                var scaledFiles = await Scale(origFile, destFile);
+                var exifFile = await ExportExif(destFile);
 
                 // only log src files in the movespec list - all scaled media will be in diff dirs...
                 if (destFile.Directory!.Name == "src")
@@ -92,11 +92,11 @@ public class Mover
         src.MoveTo(dst.FullName);
     }
 
-    async Task Scale(FileInfo origFile, FileInfo dst)
+    async Task<IEnumerable<ScaledFile>> Scale(FileInfo origFile, FileInfo dst)
     {
         if (origFile.Directory!.Name == "raw")
         {
-            await _scaler.ScaleVideo(dst);
+            return await _scaler.ScaleVideo(dst);
         }
 
         // this migration tool does not attempt to scale photos from source as that process is more complex and allows
@@ -104,16 +104,20 @@ public class Mover
         // by by scaling to avif, file size will be roughly 50%.
         if (origFile.Directory.Name == "lg")
         {
-            await _scaler.ScaleImage(dst);
+            return await _scaler.ScaleImage(dst);
         }
+
+        return [];
     }
 
-    async Task ExportExif(FileInfo origFile, FileInfo dst)
+    async Task<string?> ExportExif(FileInfo dst)
     {
-        if (origFile.Directory!.Name == "raw" || origFile.Directory!.Name == "src")
+        if (dst.Directory!.Name == "src")
         {
-            await _exifExporter.ExportAsync(dst.FullName);
+            return await _exifExporter.ExportAsync(dst.FullName);
         }
+
+        return null;
     }
 
     FileInfo BuildFileDest(DirectoryInfo origRootDir, FileInfo file, Dictionary<string, string>? renameMap = null)

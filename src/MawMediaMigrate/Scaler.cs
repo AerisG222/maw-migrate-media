@@ -4,7 +4,7 @@ namespace MawMediaMigrate;
 
 public class Scaler
 {
-    object _lockObj = new();
+    readonly Lock _lockObj = new();
     readonly Inspector _inspector = new();
     readonly List<Scale> _scales = [
         new ("qqvg", 160, 120, false),
@@ -17,8 +17,9 @@ public class Scaler
         new ("4k", 3840, 2160, false)
     ];
 
-    public async Task ScaleImage(FileInfo src)
+    public async Task<IEnumerable<ScaledFile>> ScaleImage(FileInfo src)
     {
+        var results = new List<ScaledFile>();
         var (srcWidth, srcHeight) = await _inspector.QueryDimensions(src.FullName);
 
         await Parallel.ForEachAsync(_scales, async (scale, token) =>
@@ -56,11 +57,19 @@ public class Scaler
 
             process.Start();
             await process.WaitForExitAsync(token);
+
+            lock (_lockObj)
+            {
+                results.Add(new ScaledFile(scale, dst.FullName, false));
+            }
         });
+
+        return results;
     }
 
-    public async Task ScaleVideo(FileInfo src)
+    public async Task<IEnumerable<ScaledFile>> ScaleVideo(FileInfo src)
     {
+        var results = new List<ScaledFile>();
         var (srcWidth, srcHeight) = await _inspector.QueryDimensions(src.FullName);
 
         await Parallel.ForEachAsync(_scales, async (scale, token) =>
@@ -78,11 +87,14 @@ public class Scaler
             var dst = Path.Combine(src.Directory!.Parent!.FullName, scale.Code, Path.GetFileNameWithoutExtension(src.Name));
             var dstMovie = new FileInfo($"{dst}.mp4");
             var dstPoster = new FileInfo($"{dst}.poster.avif");
-            List<(FileInfo dstFile, bool isPoster)> queue = [(dstMovie, false), (dstPoster, true)];
+            List<(FileInfo dstFile, bool isPoster)> queue = [
+                (dstMovie, false),
+                (dstPoster, true)
+            ];
 
             SafeCreateDir(dstMovie.DirectoryName!);
 
-            foreach(var (dstFile, isPoster) in queue)
+            foreach (var (dstFile, isPoster) in queue)
             {
                 var psi = new ProcessStartInfo
                 {
@@ -101,8 +113,15 @@ public class Scaler
 
                 process.Start();
                 await process.WaitForExitAsync(token);
+
+                lock (_lockObj)
+                {
+                    results.Add(new ScaledFile(scale, dstFile.FullName, isPoster));
+                }
             }
         });
+
+        return results;
     }
 
     // https://usage.imagemagick.org/resize/
