@@ -132,7 +132,7 @@ public class Scaler
             "-colorspace", "RGB"
         ];
 
-        if (scale.IsPreview)
+        if (scale.IsCropToFill)
         {
             args.AddRange([
                 "-resize", $"{scale.Width}x{scale.Height}^",
@@ -164,7 +164,7 @@ public class Scaler
             "-i", $"\"{src}\""
         ];
 
-        if (scale.IsPreview)
+        if (scale.IsCropToFill)
         {
             // scale video to fit area (full height or width, with borders as necessary)
             //"-vf", $"\"scale={scale.Width}:{scale.Height}:force_original_aspect_ratio=decrease,pad={scale.Width}:{scale.Height}:(ow-iw)/2:(oh-ih)/2\"",
