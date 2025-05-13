@@ -4,5 +4,6 @@ public record class Scale (
     string Code,
     int Width,
     int Height,
-    bool IsCropToFill
+    bool IsCropToFill,
+    bool IsPoster
 );
