@@ -8,7 +8,8 @@ public class Mover
     readonly DirectoryInfo _origDir;
     readonly DirectoryInfo _destDir;
     readonly string _mappingFile;
-    readonly Scaler _scaler = new();
+    readonly ImageScaler _imageScaler = new();
+    readonly VideoScaler _videoScaler = new();
     readonly ExifExporter _exifExporter = new ExifExporter();
 
     public Mover(DirectoryInfo origDir, DirectoryInfo destDir, string mappingFile)
@@ -96,7 +97,7 @@ public class Mover
     {
         if (origFile.Directory!.Name == "raw")
         {
-            return await _scaler.ScaleVideo(dst);
+            return await _videoScaler.Scale(dst);
         }
 
         // this migration tool does not attempt to scale photos from source as that process is more complex and allows
@@ -104,7 +105,7 @@ public class Mover
         // by by scaling to avif, file size will be roughly 50%.
         if (origFile.Directory.Name == "lg")
         {
-            return await _scaler.ScaleImage(dst);
+            return await _imageScaler.Scale(dst);
         }
 
         return [];
