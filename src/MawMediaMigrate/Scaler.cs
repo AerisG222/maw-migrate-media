@@ -6,31 +6,13 @@ public class Scaler
 {
     readonly Lock _lockObj = new();
     readonly Inspector _inspector = new();
-    readonly List<Scale> _scales = [
-        new ("qqvg",             160,  120, false, false),
-        new ("qqvg-poster",      160,  120, false, true),
-        new ("qqvg-fill",        160,  120, true,  false),
-        new ("qqvg-fill-poster", 160,  120, true,  true),
-        new ("qvg",              320,  240, false, false),
-        new ("qvg-poster",       320,  240, false, true),
-        new ("qvg-fill",         320,  240, true,  false),
-        new ("qvg-fill-poster",  320,  240, true,  true),
-        new ("nhd",              640,  480, false, false),
-        new ("nhd-poster",       640,  480, false, true),
-        new ("full_hd",         1920, 1080, false, false),
-        new ("full_hd-poster",  1920, 1080, false, true),
-        new ("qhd",             2560, 1440, false, false),
-        new ("qhd-poster",      2560, 1440, false, true),
-        new ("4k",              3840, 2160, false, false),
-        new ("4k-poster",       3840, 2160, false, true)
-    ];
 
     public async Task<IEnumerable<ScaledFile>> ScaleImage(FileInfo src)
     {
         var results = new List<ScaledFile>();
         var (srcWidth, srcHeight) = await _inspector.QueryDimensions(src.FullName);
 
-        await Parallel.ForEachAsync(_scales, async (scale, token) =>
+        await Parallel.ForEachAsync(Scale.AllScales, async (scale, token) =>
         {
             if (scale.IsPoster)
             {
@@ -85,7 +67,7 @@ public class Scaler
         var results = new List<ScaledFile>();
         var (srcWidth, srcHeight) = await _inspector.QueryDimensions(src.FullName);
 
-        await Parallel.ForEachAsync(_scales, async (scale, token) =>
+        await Parallel.ForEachAsync(Scale.AllScales, async (scale, token) =>
         {
             if (!ShouldScale(srcWidth, srcHeight, scale))
             {
