@@ -1,40 +1,33 @@
-using System.Globalization;
-using CsvHelper;
-
 namespace MawMediaMigrate;
 
 public class Mover
 {
     readonly DirectoryInfo _origDir;
     readonly DirectoryInfo _destDir;
-    readonly string _mappingFile;
     readonly ImageScaler _imageScaler = new();
     readonly VideoScaler _videoScaler = new();
-    readonly ExifExporter _exifExporter = new ExifExporter();
+    readonly ExifExporter _exifExporter = new();
 
-    public Mover(DirectoryInfo origDir, DirectoryInfo destDir, string mappingFile)
+    public Mover(DirectoryInfo origDir, DirectoryInfo destDir)
     {
         _origDir = origDir;
         _destDir = destDir;
-        _mappingFile = mappingFile;
     }
 
-    public async Task MoveFiles()
+    public IEnumerable<MoveResult> MoveFiles()
     {
-        var imageSpecs = MoveImages();
-        var videoSpecs = MoveVideos();
+        var imageResults = MoveImages();
+        var videoResults = MoveVideos();
 
-        var moveSpecs = imageSpecs.Concat(videoSpecs);
-
-        await WriteMappingFile(moveSpecs);
+        return imageResults.Concat(videoResults);
     }
 
-    IEnumerable<MoveSpec> MoveImages()
+    IEnumerable<MoveResult> MoveImages()
     {
         return MoveOriginalMedia("images", ["src", "lg"]).ToBlockingEnumerable();
     }
 
-    IEnumerable<MoveSpec> MoveVideos()
+    IEnumerable<MoveResult> MoveVideos()
     {
         var renames = new Dictionary<string, string>
         {
@@ -44,7 +37,7 @@ public class Mover
         return MoveOriginalMedia("movies", ["raw"], renames).ToBlockingEnumerable();
     }
 
-    async IAsyncEnumerable<MoveSpec> MoveOriginalMedia(
+    async IAsyncEnumerable<MoveResult> MoveOriginalMedia(
         string origMediaDirName,
         string[] dirsToKeep,
         Dictionary<string, string>? renameMap = null
@@ -73,7 +66,7 @@ public class Mover
                 // only log src files in the movespec list - all scaled media will be in diff dirs...
                 if (destFile.Directory!.Name == "src")
                 {
-                    yield return new MoveSpec
+                    yield return new MoveResult
                     {
                         Src = origFile.FullName,
                         Dst = destFile.FullName
@@ -137,13 +130,5 @@ public class Mover
             .Replace("_", "-");
 
         return new FileInfo(Path.Combine(destDirName, file.Name));
-    }
-
-    async Task WriteMappingFile(IEnumerable<MoveSpec> moveSpecs)
-    {
-        using var writer = new StreamWriter(_mappingFile);
-        using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
-
-        await csv.WriteRecordsAsync(moveSpecs);
     }
 }

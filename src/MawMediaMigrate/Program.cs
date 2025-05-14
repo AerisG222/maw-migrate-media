@@ -28,9 +28,12 @@ if (string.IsNullOrEmpty(mappingFile) || File.Exists(mappingFile))
     Environment.Exit(4);
 }
 
-var mover = new Mover(origDir, destDir, mappingFile);
+var mover = new Mover(origDir, destDir);
+var writer = new ResultWriter();
 
-await mover.MoveFiles();
+var results = mover.MoveFiles();
+
+await writer.WriteMappingFile(mappingFile, results);
 
 static void ShowUsage()
 {
