@@ -1,6 +1,0 @@
-namespace MawMediaMigrate;
-
-public record class ScaledFile (
-    Scale Scale,
-    string Path
-);

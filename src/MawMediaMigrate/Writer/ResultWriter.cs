@@ -1,7 +1,8 @@
 using System.Globalization;
 using CsvHelper;
+using MawMediaMigrate.Move;
 
-namespace MawMediaMigrate;
+namespace MawMediaMigrate.Writer;
 
 public class ResultWriter
 {

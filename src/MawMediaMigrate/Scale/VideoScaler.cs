@@ -1,16 +1,25 @@
 using System.Diagnostics;
 
-namespace MawMediaMigrate;
+namespace MawMediaMigrate.Scale;
 
 public class VideoScaler
     : BaseScaler
 {
-    public override async Task<IEnumerable<ScaledFile>> Scale(FileInfo src)
+    readonly DirectoryInfo _origDir;
+    readonly DirectoryInfo _destDir;
+
+    public VideoScaler(DirectoryInfo origDir, DirectoryInfo destDir)
+    {
+        _origDir = origDir;
+        _destDir = destDir;
+    }
+
+    public override async Task<ScaleResult> Scale(FileInfo src)
     {
         var results = new List<ScaledFile>();
         var (srcWidth, srcHeight) = await _inspector.QueryDimensions(src.FullName);
 
-        await Parallel.ForEachAsync(MawMediaMigrate.Scale.AllScales, async (scale, token) =>
+        await Parallel.ForEachAsync(ScaleSpec.AllScales, async (scale, token) =>
         {
             if (!ShouldScale(srcWidth, srcHeight, scale))
             {
@@ -25,7 +34,7 @@ public class VideoScaler
             var dstPrefix = Path.Combine(src.Directory!.Parent!.FullName, scale.Code, Path.GetFileNameWithoutExtension(src.Name));
             var dstFile = new FileInfo($"{dstPrefix}{(scale.IsPoster ? ".poster.avif" : ".mp4")}");
 
-            SafeCreateDir(dstFile.DirectoryName!);
+            CreateDir(dstFile.DirectoryName!);
 
             var psi = new ProcessStartInfo
             {
@@ -51,12 +60,12 @@ public class VideoScaler
             }
         });
 
-        return results;
+        return new ScaleResult(src.FullName, results);
     }
 
     // https://trac.ffmpeg.org/wiki/Encode/AV1#SVT-AV1
     // https://www.ffmpeg.org/ffmpeg-all.html#scale-1
-    static string GetFfmpegArgs(string src, string dst, Scale scale)
+    static string GetFfmpegArgs(string src, string dst, ScaleSpec scale)
     {
         List<string> args = [
             "-i", $"\"{src}\""

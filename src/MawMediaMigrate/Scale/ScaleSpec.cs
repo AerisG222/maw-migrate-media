@@ -1,13 +1,13 @@
-namespace MawMediaMigrate;
+namespace MawMediaMigrate.Scale;
 
-public record class Scale(
+public record class ScaleSpec(
     string Code,
     int Width,
     int Height,
     bool IsCropToFill,
     bool IsPoster
 ) {
-    static readonly Scale[] _allScales = [
+    static readonly ScaleSpec[] _allScales = [
         new ("qqvg",             160,  120, false, false),
         new ("qqvg-poster",      160,  120, false, true),
         new ("qqvg-fill",        160,  120, true,  false),
@@ -26,5 +26,5 @@ public record class Scale(
         new ("4k-poster",       3840, 2160, false, true)
     ];
 
-    public static Scale[] AllScales => _allScales;
+    public static ScaleSpec[] AllScales => _allScales;
 }

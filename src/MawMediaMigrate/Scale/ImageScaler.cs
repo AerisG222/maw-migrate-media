@@ -1,16 +1,25 @@
 using System.Diagnostics;
 
-namespace MawMediaMigrate;
+namespace MawMediaMigrate.Scale;
 
 public class ImageScaler
     : BaseScaler
 {
-    public override async Task<IEnumerable<ScaledFile>> Scale(FileInfo src)
+    readonly DirectoryInfo _origDir;
+    readonly DirectoryInfo _destDir;
+
+    public ImageScaler(DirectoryInfo origDir, DirectoryInfo destDir)
+    {
+        _origDir = origDir;
+        _destDir = destDir;
+    }
+
+    public override async Task<ScaleResult> Scale(FileInfo src)
     {
         var results = new List<ScaledFile>();
         var (srcWidth, srcHeight) = await _inspector.QueryDimensions(src.FullName);
 
-        await Parallel.ForEachAsync(MawMediaMigrate.Scale.AllScales, async (scale, token) =>
+        await Parallel.ForEachAsync(ScaleSpec.AllScales, async (scale, token) =>
         {
             if (scale.IsPoster)
             {
@@ -31,7 +40,7 @@ public class ImageScaler
                 Path.Combine(src.Directory!.Parent!.FullName, scale.Code, $"{Path.GetFileNameWithoutExtension(src.Name)}.avif")
             );
 
-            SafeCreateDir(dst.DirectoryName!);
+            CreateDir(dst.DirectoryName!);
 
             var psi = new ProcessStartInfo
             {
@@ -57,11 +66,11 @@ public class ImageScaler
             }
         });
 
-        return results;
+        return new ScaleResult(src.FullName, results);
     }
 
     // https://usage.imagemagick.org/resize/
-    static string GetImageMagickArgs(string src, string dst, Scale scale)
+    static string GetImageMagickArgs(string src, string dst, ScaleSpec scale)
     {
         List<string> args = [
             $"\"{src}\"",
