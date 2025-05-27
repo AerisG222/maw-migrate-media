@@ -1,6 +1,6 @@
 namespace MawMediaMigrate.Scale;
 
-public record class ScaledFile (
+record class ScaledFile (
     ScaleSpec Scale,
     string Path
 );

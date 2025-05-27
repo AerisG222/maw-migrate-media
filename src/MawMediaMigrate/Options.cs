@@ -1,6 +1,6 @@
 namespace MawMediaMigrate;
 
-public class Options
+class Options
 {
     public required DirectoryInfo OrigDir { get; init; }
     public required DirectoryInfo DestDir { get; init; }

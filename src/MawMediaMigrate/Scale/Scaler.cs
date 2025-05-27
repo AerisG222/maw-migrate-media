@@ -1,6 +1,6 @@
 namespace MawMediaMigrate.Scale;
 
-public class Scaler
+class Scaler
 {
     readonly Lock _lockObj = new();
     readonly DirectoryInfo _origDir;

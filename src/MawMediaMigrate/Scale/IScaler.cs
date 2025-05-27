@@ -1,6 +1,6 @@
 namespace MawMediaMigrate.Scale;
 
-public interface IScaler
+interface IScaler
 {
     Task<ScaleResult> Scale(FileInfo src);
 }

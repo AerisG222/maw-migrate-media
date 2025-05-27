@@ -1,6 +1,6 @@
 namespace MawMediaMigrate.Scale;
 
-public record class ScaleSpec(
+record class ScaleSpec(
     string Code,
     int Width,
     int Height,

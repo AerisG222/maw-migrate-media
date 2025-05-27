@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace MawMediaMigrate.Scale;
 
-public class Inspector
+class Inspector
 {
     public async Task<(int width, int height)> QueryDimensions(string path)
     {

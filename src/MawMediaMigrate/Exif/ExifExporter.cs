@@ -3,6 +3,7 @@ using System.Diagnostics;
 namespace MawMediaMigrate.Exif;
 
 class ExifExporter
+    : IExifExporter
 {
     readonly Lock _lockObj = new();
 

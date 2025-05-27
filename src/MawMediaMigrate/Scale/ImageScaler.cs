@@ -2,7 +2,7 @@ using System.Diagnostics;
 
 namespace MawMediaMigrate.Scale;
 
-public class ImageScaler
+class ImageScaler
     : BaseScaler
 {
     readonly DirectoryInfo _origDir;

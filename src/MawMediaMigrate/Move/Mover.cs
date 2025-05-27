@@ -1,6 +1,7 @@
 namespace MawMediaMigrate.Move;
 
-public class Mover
+class Mover
+    : IMover
 {
     readonly Lock _lockObj = new();
     readonly DirectoryInfo _origDir;

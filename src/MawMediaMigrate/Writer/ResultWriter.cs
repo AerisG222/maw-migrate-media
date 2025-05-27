@@ -4,7 +4,7 @@ using MawMediaMigrate.Move;
 
 namespace MawMediaMigrate.Writer;
 
-public class ResultWriter
+class ResultWriter : IResultWriter
 {
     public async Task WriteMappingFile(string outfile, IEnumerable<MoveResult> moveSpecs)
     {

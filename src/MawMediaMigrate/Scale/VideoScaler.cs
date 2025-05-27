@@ -2,7 +2,7 @@ using System.Diagnostics;
 
 namespace MawMediaMigrate.Scale;
 
-public class VideoScaler
+class VideoScaler
     : BaseScaler
 {
     readonly DirectoryInfo _origDir;
