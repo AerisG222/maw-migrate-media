@@ -1,18 +1,18 @@
 namespace MawMediaMigrate.Scale;
 
-class Scaler
+class ManagedScaler
+    : IManagedScaler
 {
     readonly Lock _lockObj = new();
     readonly DirectoryInfo _origDir;
-    readonly ImageScaler _imageScaler;
-    readonly VideoScaler _videoScaler;
+    readonly IScaler _imageScaler;
+    readonly IScaler _videoScaler;
 
-    public Scaler(DirectoryInfo origDir, DirectoryInfo destDir)
+    public ManagedScaler(DirectoryInfo origDir, IScaler imageScaler, IScaler videoScaler)
     {
+        _imageScaler = imageScaler;
+        _videoScaler = videoScaler;
         _origDir = origDir;
-
-        _imageScaler = new ImageScaler(origDir, destDir);
-        _videoScaler = new VideoScaler(origDir, destDir);
     }
 
     public async Task<IEnumerable<ScaleResult>> ScaleFiles()

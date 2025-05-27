@@ -6,10 +6,10 @@ using MawMediaMigrate.Writer;
 
 var opts = Options.FromArgs(args);
 
-var mover = new Mover(opts.OrigDir, opts.DestDir);
-var exifExporter = new ExifExporter();
-var scaler = new Scaler(opts.OrigDir, opts.DestDir);
-var writer = new ResultWriter();
+var mover = MoverFactory.Create(opts);
+var exifExporter = ExifExporterFactory.Create(opts);
+var scaler = ManagedScalerFactory.Create(opts);
+var writer = ResultWriterFactory.Create(opts);
 
 // consider dictionary w/ alt key to easily update records/results
 var moveResults = mover.MoveFiles();
