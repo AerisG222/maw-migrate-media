@@ -1,18 +1,29 @@
 namespace MawMediaMigrate.Scale;
 
-class ManagedScaler
-    : IManagedScaler
+class ScaleProcessor
 {
     readonly Lock _lockObj = new();
     readonly DirectoryInfo _origDir;
     readonly IScaler _imageScaler;
     readonly IScaler _videoScaler;
 
-    public ManagedScaler(DirectoryInfo origDir, IScaler imageScaler, IScaler videoScaler)
+    public ScaleProcessor(Options options)
     {
-        _imageScaler = imageScaler;
-        _videoScaler = videoScaler;
-        _origDir = origDir;
+        ArgumentNullException.ThrowIfNull(options);
+
+        IInspector inspector = options.DryRun
+            ? new DryRunInspector()
+            : new Inspector();
+
+        _imageScaler = options.DryRun
+            ? new DryRunPhotoScaler(inspector, options.OrigDir, options.DestDir)
+            : new PhotoScaler(inspector, options.OrigDir, options.DestDir);
+
+        _videoScaler = options.DryRun
+            ? new DryRunVideoScaler(inspector, options.OrigDir, options.DestDir)
+            : new VideoScaler(inspector, options.OrigDir, options.DestDir);
+
+        _origDir = options.OrigDir;
     }
 
     public async Task<IEnumerable<ScaleResult>> ScaleFiles()
@@ -46,7 +57,7 @@ class ManagedScaler
                 return;
             }
 
-            var scaleResult = await scaler.Scale(file);
+            var scaleResult = await scaler.Scale(file, origMediaRoot);
 
             lock (_lockObj)
             {

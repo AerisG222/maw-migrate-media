@@ -2,5 +2,5 @@ namespace MawMediaMigrate.Move;
 
 interface IMover
 {
-    IEnumerable<MoveResult> MoveFiles();
+    MoveResult Move(FileInfo file, FileInfo destFile);
 }

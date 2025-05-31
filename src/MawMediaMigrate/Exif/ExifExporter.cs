@@ -5,53 +5,18 @@ namespace MawMediaMigrate.Exif;
 class ExifExporter
     : IExifExporter
 {
-    readonly Lock _lockObj = new();
-
-    public async Task<IEnumerable<ExifResult>> ExportExifData(DirectoryInfo mediaRoot)
+    public async Task<ExifResult> Export(FileInfo file, FileInfo outfile)
     {
-        var result = new List<ExifResult>();
-        var files = mediaRoot.EnumerateFiles("*", SearchOption.AllDirectories);
-
-        await Parallel.ForEachAsync(files, async (file, token) =>
+        if (outfile.Exists)
         {
-            if (file.Directory!.Name != "src")
+            return new ExifResult
             {
-                return;
-            }
-
-            var outfile = await Export(file.FullName);
-
-            if (outfile != null)
-            {
-                lock (_lockObj)
-                {
-                    result.Add(new ExifResult
-                    {
-                        Src = file.FullName,
-                        ExifFile = outfile
-                    });
-                }
-            }
-        });
-
-        return result;
-    }
-
-    async Task<string?> Export(string mediaFile)
-    {
-        if (string.IsNullOrWhiteSpace(mediaFile))
-        {
-            throw new ArgumentException("The media file cannot be null or empty.", nameof(mediaFile));
+                Src = file.FullName,
+                ExifFile = outfile.FullName
+            };
         }
 
-        var outfile = $"{mediaFile}.json";
-
-        if (File.Exists(outfile))
-        {
-            return outfile;
-        }
-
-        var arguments = $"-json -quiet -groupHeadings -long -textOut \"%d%f.%e.json\" \"{mediaFile}\"";
+        var arguments = $"-json -quiet -groupHeadings -long -textOut \"%d%f.%e.json\" \"{file.FullName}\"";
         var psi = new ProcessStartInfo
         {
             FileName = "exiftool",
@@ -68,9 +33,15 @@ class ExifExporter
 
         if (process.ExitCode == 0)
         {
-            return outfile;
+            return new ExifResult
+            {
+                Src = file.FullName,
+                ExifFile = outfile.FullName
+            };
         }
 
-        return null;
+        throw new InvalidOperationException(
+            $"ExifTool failed to process file {file.FullName}. Exit code: {process.ExitCode}"
+        );
     }
 }

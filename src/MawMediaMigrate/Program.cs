@@ -6,14 +6,17 @@ using MawMediaMigrate.Writer;
 
 var opts = Options.FromArgs(args);
 
-var mover = MoverFactory.Create(opts);
-var exifExporter = ExifExporterFactory.Create(opts);
-var scaler = ManagedScalerFactory.Create(opts);
+// note: dry-run currently doesn't work as some steps expect that directories are created / files are moved
+// not going to build out the rest of that now as its not currently worth the time, but will leave here
+// in case it becoms useful in the future =|
+
+var scaleProcessor = new ScaleProcessor(opts);
+var moveProcessor = new MoveProcessor(opts);
+var exifProcessor = new ExifProcessor(opts);
 var writer = ResultWriterFactory.Create(opts);
 
-// consider dictionary w/ alt key to easily update records/results
-var moveResults = mover.MoveFiles();
-var exifResults = await exifExporter.ExportExifData(opts.DestDir);
-var scaledFiles = await scaler.ScaleFiles();
+var scaledFiles = await scaleProcessor.ScaleFiles();
+var moveResults = moveProcessor.MoveFiles();
+var exifResults = await exifProcessor.ExportExifData();
 
-await writer.WriteMappingFile(opts.MappingFile.FullName, moveResults);
+await writer.WriteMappingFile(moveResults, exifResults, scaledFiles);

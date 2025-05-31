@@ -2,19 +2,16 @@ using System.Diagnostics;
 
 namespace MawMediaMigrate.Scale;
 
-class ImageScaler
+class PhotoScaler
     : BaseScaler
 {
-    readonly DirectoryInfo _origDir;
-    readonly DirectoryInfo _destDir;
-
-    public ImageScaler(DirectoryInfo origDir, DirectoryInfo destDir)
+    public PhotoScaler(IInspector inspector, DirectoryInfo origRootDir, DirectoryInfo destRootDir)
+        : base(inspector, origRootDir, destRootDir)
     {
-        _origDir = origDir;
-        _destDir = destDir;
+
     }
 
-    public override async Task<ScaleResult> Scale(FileInfo src)
+    public override async Task<ScaleResult> Scale(FileInfo src, DirectoryInfo origMediaRoot)
     {
         var results = new List<ScaledFile>();
         var (srcWidth, srcHeight) = await _inspector.QueryDimensions(src.FullName);
@@ -28,16 +25,15 @@ class ImageScaler
 
             if (!ShouldScale(srcWidth, srcHeight, scale))
             {
-                lock (_lockObj)
-                {
-                    Console.WriteLine($"  - not scaling {src.Name} to {scale}");
-                }
-
                 return;
             }
 
             var dst = new FileInfo(
-                Path.Combine(src.Directory!.Parent!.FullName, scale.Code, $"{Path.GetFileNameWithoutExtension(src.Name)}.avif")
+                Path.Combine(
+                    src.Directory!.Parent!.FullName.Replace(origMediaRoot.FullName, _destRootDir.FullName).FixupMediaDirectory(),
+                    scale.Code,
+                    $"{Path.GetFileNameWithoutExtension(src.Name)}.avif"
+                )
             );
 
             CreateDir(dst.DirectoryName!);

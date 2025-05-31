@@ -2,5 +2,5 @@ namespace MawMediaMigrate.Exif;
 
 interface IExifExporter
 {
-    Task<IEnumerable<ExifResult>> ExportExifData(DirectoryInfo mediaRoot);
+    Task<ExifResult> Export(FileInfo file, FileInfo outfile);
 }

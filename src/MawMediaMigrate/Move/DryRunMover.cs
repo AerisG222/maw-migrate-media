@@ -1,17 +1,10 @@
 namespace MawMediaMigrate.Move;
 
-class Mover
+class DryRunMover
     : IMover
 {
     public MoveResult Move(FileInfo src, FileInfo dst)
     {
-        if (!dst.Directory!.Exists)
-        {
-            dst.Directory.Create();
-        }
-
-        File.Move(src.FullName, dst.FullName);
-
         return new MoveResult
         {
             Src = src.FullName,

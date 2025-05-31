@@ -4,6 +4,6 @@ static class ResultWriterFactory
 {
     public static IResultWriter Create(Options options)
     {
-        return new ResultWriter();
+        return new ResultWriter(options.MappingFile);
     }
 }

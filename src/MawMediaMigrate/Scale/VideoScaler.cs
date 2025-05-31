@@ -5,16 +5,13 @@ namespace MawMediaMigrate.Scale;
 class VideoScaler
     : BaseScaler
 {
-    readonly DirectoryInfo _origDir;
-    readonly DirectoryInfo _destDir;
-
-    public VideoScaler(DirectoryInfo origDir, DirectoryInfo destDir)
+    public VideoScaler(IInspector inspector, DirectoryInfo origRootDir, DirectoryInfo destRootDir)
+        : base(inspector, origRootDir, destRootDir)
     {
-        _origDir = origDir;
-        _destDir = destDir;
+
     }
 
-    public override async Task<ScaleResult> Scale(FileInfo src)
+    public override async Task<ScaleResult> Scale(FileInfo src, DirectoryInfo origMediaRoot)
     {
         var results = new List<ScaledFile>();
         var (srcWidth, srcHeight) = await _inspector.QueryDimensions(src.FullName);
@@ -23,15 +20,14 @@ class VideoScaler
         {
             if (!ShouldScale(srcWidth, srcHeight, scale))
             {
-                lock (_lockObj)
-                {
-                    Console.WriteLine($"  - not scaling {src.Name} to {scale}");
-                }
-
                 return;
             }
 
-            var dstPrefix = Path.Combine(src.Directory!.Parent!.FullName, scale.Code, Path.GetFileNameWithoutExtension(src.Name));
+            var dstPrefix = Path.Combine(
+                src.Directory!.Parent!.FullName.Replace(origMediaRoot.FullName, _destRootDir.FullName).FixupMediaDirectory(),
+                scale.Code,
+                Path.GetFileNameWithoutExtension(src.Name)
+            );
             var dstFile = new FileInfo($"{dstPrefix}{(scale.IsPoster ? ".poster.avif" : ".mp4")}");
 
             CreateDir(dstFile.DirectoryName!);

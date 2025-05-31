@@ -1,8 +1,10 @@
+using MawMediaMigrate.Exif;
 using MawMediaMigrate.Move;
+using MawMediaMigrate.Scale;
 
 namespace MawMediaMigrate.Writer;
 
 interface IResultWriter
 {
-    Task WriteMappingFile(string outfile, IEnumerable<MoveResult> moveSpecs);
+    Task WriteMappingFile(IEnumerable<MoveResult> moveSpecs, IEnumerable<ExifResult> exifResults, IEnumerable<ScaleResult> scaledFiles);
 }

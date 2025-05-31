@@ -4,9 +4,22 @@ abstract class BaseScaler
     : IScaler
 {
     protected readonly Lock _lockObj = new();
-    protected readonly Inspector _inspector = new();
+    protected readonly IInspector _inspector;
+    protected readonly DirectoryInfo _origRootDir;
+    protected readonly DirectoryInfo _destRootDir;
 
-    public abstract Task<ScaleResult> Scale(FileInfo src);
+    public BaseScaler(IInspector inspector, DirectoryInfo origRootDir, DirectoryInfo destRootDir)
+    {
+        ArgumentNullException.ThrowIfNull(inspector);
+        ArgumentNullException.ThrowIfNull(origRootDir);
+        ArgumentNullException.ThrowIfNull(destRootDir);
+
+        _inspector = inspector;
+        _origRootDir = origRootDir;
+        _destRootDir = destRootDir;
+    }
+
+    public abstract Task<ScaleResult> Scale(FileInfo src, DirectoryInfo origMediaRoot);
 
     protected static bool ShouldScale(int width, int height, ScaleSpec scale)
     {
