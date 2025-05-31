@@ -4,7 +4,7 @@ class Options
 {
     public required DirectoryInfo OrigDir { get; init; }
     public required DirectoryInfo DestDir { get; init; }
-    public required FileInfo MappingFile { get; init; }
+    public required DirectoryInfo OutDir { get; init; }
     public bool DryRun { get; init; }
 
     public static Options FromArgs(string[] args)
@@ -17,7 +17,7 @@ class Options
 
         var origDir = new DirectoryInfo(args[0]);
         var destDir = new DirectoryInfo(args[1]);
-        var mappingFile = args[2];
+        var outDir = new DirectoryInfo(args[2]);
 
         if (!origDir.Exists || !string.Equals("website_assets", origDir.Name, StringComparison.OrdinalIgnoreCase))
         {
@@ -31,10 +31,9 @@ class Options
             Environment.Exit(3);
         }
 
-        if (string.IsNullOrEmpty(mappingFile) || File.Exists(mappingFile))
+        if (!outDir.Exists)
         {
-            Console.WriteLine("Invalid mapping file specified or already exists.");
-            Environment.Exit(4);
+            outDir.Create();
         }
 
         var dryRun = false;
@@ -48,17 +47,17 @@ class Options
         {
             OrigDir = origDir,
             DestDir = destDir,
-            MappingFile = new FileInfo(mappingFile),
+            OutDir = outDir,
             DryRun = dryRun
         };
     }
 
     static void ShowUsage()
     {
-        Console.WriteLine("Usage: MawMediaMigrate <orig-websiteassets-dir> <destination-media-dir> <mapping-file> [--dry-run]");
+        Console.WriteLine("Usage: MawMediaMigrate <orig-websiteassets-dir> <destination-media-dir> <out-dir> [--dry-run]");
         Console.WriteLine("  <orig-websiteassets-dir> - Directory to start looking for photos / videos in the legacy directory structure.");
         Console.WriteLine("  <destination-media-dir> - Directory to move the files to.");
-        Console.WriteLine("  <mapping-file> - File to store the mapping of original file paths to new file paths.");
+        Console.WriteLine("  <out-dir> - Directory where results should be written to - mover / scaler / exif, so they can later be used to build sql scripts.");
         Console.WriteLine("  --dry-run - Do not perform any operations, just show what would be done.");
     }
 }

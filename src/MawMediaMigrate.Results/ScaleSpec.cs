@@ -1,6 +1,6 @@
-namespace MawMediaMigrate.Scale;
+namespace MawMediaMigrate.Results;
 
-record class ScaleSpec(
+public record class ScaleSpec(
     string Code,
     int Width,
     int Height,

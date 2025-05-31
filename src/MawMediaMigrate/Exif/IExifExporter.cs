@@ -1,3 +1,5 @@
+using MawMediaMigrate.Results;
+
 namespace MawMediaMigrate.Exif;
 
 interface IExifExporter
