@@ -19,7 +19,7 @@
             "name": "Debug MawMediaSqlUpdate",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "build",
+            "preLaunchTask": "buildMawMediaSqlUpdate",
             "program": "${workspaceFolder}/src/MawMediaSqlUpdate/bin/Debug/net9.0/MawMediaSqlUpdate",
             "args": [
                 "/srv/www/mover-test/website_assets",

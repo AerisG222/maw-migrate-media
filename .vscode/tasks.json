@@ -16,6 +16,22 @@
                 "kind": "build",
                 "isDefault": true
             }
+        },
+        {
+            "label": "buildMawMediaSqlUpdate",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/src/MawMediaSqlUpdate/MawMediaSqlUpdate.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         }
     ]
 }
