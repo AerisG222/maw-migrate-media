@@ -2,10 +2,12 @@
 using MawMediaSqlUpdate;
 
 var opts = Options.FromArgs(args);
+var repo = new MediaRepo(opts.OrigMediaDir, opts.DestMediaDir);
 
-(var moveSpecs, var exifResults, var scaledFiles) = await new ResultReader().ReadResults(opts.SrcDir);
+(var moveSpecs, var exifResults, var scaledFiles) = await new ResultReader().ReadResults(opts.JsonResultsDir);
 
-foreach(var moveSpec in moveSpecs)
-{
-    Console.WriteLine($"Move: {moveSpec.Src} -> {moveSpec.Dst}");
-}
+repo.AddMoveInfo(moveSpecs);
+repo.AddExifInfo(exifResults);
+repo.AddScaleInfo(scaledFiles);
+
+
