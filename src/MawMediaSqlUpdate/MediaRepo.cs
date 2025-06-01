@@ -15,17 +15,29 @@ class MediaRepo
         _destMediaDir = destMediaDir;
     }
 
-    public void AddMoveInfo(IEnumerable<MoveResult> results)
+    public void AssembleMediaInfo(
+        IEnumerable<MoveResult> moveResults,
+        IEnumerable<ExifResult> exifResults,
+        IEnumerable<ScaleResult> scaledFiles
+    )
+    {
+        // order is important, so handle this ourselves
+        AddMoveInfo(moveResults);
+        AddExifInfo(exifResults);
+        AddScaleInfo(scaledFiles);
+    }
+
+    void AddMoveInfo(IEnumerable<MoveResult> results)
     {
         foreach (var result in results)
         {
-            var mi = GetMediaInfo(result.Dst);
+            var mi = CreateMediaInfo(result.Dst);
 
             mi.OriginalSrcPath = result.Src;
         }
     }
 
-    public void AddExifInfo(IEnumerable<ExifResult> results)
+    void AddExifInfo(IEnumerable<ExifResult> results)
     {
         foreach (var result in results)
         {
@@ -35,7 +47,7 @@ class MediaRepo
         }
     }
 
-    public void AddScaleInfo(IEnumerable<ScaleResult> results)
+    void AddScaleInfo(IEnumerable<ScaleResult> results)
     {
         foreach (var result in results)
         {
@@ -45,16 +57,13 @@ class MediaRepo
         }
     }
 
-    MediaInfo GetMediaInfo(string path)
+    MediaInfo GetMediaInfo(string path) => _dict[CleanDestinationPath(path)];
+
+    MediaInfo CreateMediaInfo(string path)
     {
         var dst = CleanDestinationPath(path);
 
-        if (_dict.TryGetValue(path, out var mediaInfo))
-        {
-            return mediaInfo;
-        }
-
-        mediaInfo = new MediaInfo
+        var mediaInfo = new MediaInfo
         {
             DestinationSrcPath = dst
         };
