@@ -2,6 +2,9 @@ using MawMediaMigrate.Results;
 
 class MediaRepo
 {
+    // we scaled the 'lg' images as those had all the adjustments applied at full resolution rather than from src
+    // so for those, we need to additionally provide a mapping from lg to new src files.
+    readonly Dictionary<string, string> _oldSrcToNewSrcDict = [];
     readonly Dictionary<string, MediaInfo> _dict = [];
     readonly DirectoryInfo _origMediaDir;
     readonly DirectoryInfo _destMediaDir;
@@ -21,7 +24,7 @@ class MediaRepo
         IEnumerable<ScaleResult> scaledFiles
     )
     {
-        // order is important, so handle this ourselves
+        // order is important, move needs to come first as this provides the base mapping
         AddMoveInfo(moveResults);
         AddExifInfo(exifResults);
         AddScaleInfo(scaledFiles);
@@ -31,9 +34,7 @@ class MediaRepo
     {
         foreach (var result in results)
         {
-            var mi = CreateMediaInfo(result.Dst);
-
-            mi.OriginalSrcPath = result.Src;
+            CreateMediaInfo(result);
         }
     }
 
@@ -51,31 +52,48 @@ class MediaRepo
     {
         foreach (var result in results)
         {
-            // we will need to treat this special as we scaled the 'lg' images as those had all the adjustments applied at full resolution -
-            // rather than using the src images, many of which are raw and when through various processing over the years.  so here we need
-            // to more flexibly match the scaled 'lg' files to the 'src' files.
+            // video src/raw files should match up, so try to to look that up first
+            if (!_dict.TryGetValue(result.SrcPath, out var mi))
+            {
+                mi = GetMediaInfoByAlternateKey(result.SrcPath);
+            }
+
+            mi.ScaledFiles = result.ScaledFiles;
         }
     }
 
     MediaInfo GetMediaInfo(string path) => _dict[CleanDestinationPath(path)];
+    MediaInfo GetMediaInfoByAlternateKey(string path) => _dict[_oldSrcToNewSrcDict[CleanAltKeyPath(path)]];
 
-    MediaInfo CreateMediaInfo(string path)
+    void CreateMediaInfo(MoveResult result)
     {
-        var dst = CleanDestinationPath(path);
+        var dst = CleanDestinationPath(result.Dst);
 
         var mediaInfo = new MediaInfo
         {
-            DestinationSrcPath = dst
+            DestinationSrcPath = dst,
+            OriginalSrcPath = result.Src
         };
 
         _dict[dst] = mediaInfo;
-
-        return mediaInfo;
+        _oldSrcToNewSrcDict[CleanAltKeyPath(result.Src)] = dst;
     }
 
     string CleanDestinationPath(string path)
     {
         return path
             .Replace(_origMediaDir.FullName, string.Empty, StringComparison.OrdinalIgnoreCase);
+    }
+
+    string CleanAltKeyPath(string path)
+    {
+        var file = new FileInfo(
+            path
+                .Replace(_origMediaDir.FullName, string.Empty, StringComparison.OrdinalIgnoreCase)
+                .Replace("/lg/", "/")
+                .Replace("/src/", "/")
+        );
+
+        return Path.Combine(file.Directory?.FullName ?? string.Empty, Path.GetFileNameWithoutExtension(file.Name));
     }
 }
