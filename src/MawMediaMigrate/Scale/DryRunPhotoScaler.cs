@@ -15,19 +15,10 @@ class DryRunPhotoScaler
     {
         var results = new List<ScaledFile>();
         var (srcWidth, srcHeight) = await _inspector.QueryDimensions(src.FullName);
+        var scales = GetScalesForDimensions(srcWidth, srcHeight, false);
 
-        foreach(var scale in ScaleSpec.AllScales)
+        foreach (var scale in scales)
         {
-            if (scale.IsPoster)
-            {
-                continue;  // only for videos
-            }
-
-            if (!ShouldScale(srcWidth, srcHeight, scale))
-            {
-                continue;
-            }
-
             var dst = new FileInfo(
                 Path.Combine(
                     src.Directory!.Parent!.FullName.Replace(origMediaRoot.FullName, _destRootDir.FullName).FixupMediaDirectory(),

@@ -16,19 +16,10 @@ class PhotoScaler
     {
         var results = new List<ScaledFile>();
         var (srcWidth, srcHeight) = await _inspector.QueryDimensions(src.FullName);
+        var scales = GetScalesForDimensions(srcWidth, srcHeight, false);
 
-        await Parallel.ForEachAsync(ScaleSpec.AllScales, async (scale, token) =>
+        await Parallel.ForEachAsync(scales, async (scale, token) =>
         {
-            if (scale.IsPoster)
-            {
-                return;  // only for videos
-            }
-
-            if (!ShouldScale(srcWidth, srcHeight, scale))
-            {
-                return;
-            }
-
             var dst = new FileInfo(
                 Path.Combine(
                     src.Directory!.Parent!.FullName.Replace(origMediaRoot.FullName, _destRootDir.FullName).FixupMediaDirectory(),
@@ -84,8 +75,9 @@ class PhotoScaler
         }
         else
         {
+            // the > at the end means "only scale down, not up"
             args.AddRange([
-                "-resize", $"{scale.Width}x{scale.Height}"
+                "-resize", $"\"{scale.Width}x{scale.Height}>\""
             ]);
         }
 

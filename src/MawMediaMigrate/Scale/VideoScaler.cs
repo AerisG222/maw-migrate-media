@@ -16,14 +16,10 @@ class VideoScaler
     {
         var results = new List<ScaledFile>();
         var (srcWidth, srcHeight) = await _inspector.QueryDimensions(src.FullName);
+        var scales = GetScalesForDimensions(srcWidth, srcHeight, true);
 
-        await Parallel.ForEachAsync(ScaleSpec.AllScales, async (scale, token) =>
+        await Parallel.ForEachAsync(scales, async (scale, token) =>
         {
-            if (!ShouldScale(srcWidth, srcHeight, scale))
-            {
-                return;
-            }
-
             var dstPrefix = Path.Combine(
                 src.Directory!.Parent!.FullName.Replace(origMediaRoot.FullName, _destRootDir.FullName).FixupMediaDirectory(),
                 scale.Code,
@@ -85,7 +81,7 @@ class VideoScaler
             args.AddRange([
                 "-c:a", "aac",
                 "-b:a", "128k",
-                "-vf", $"\"scale={scale.Width}:{scale.Height}:force_original_aspect_ratio=decrease:force_divisible_by=2\""
+                "-vf", $"\"scale='min({scale.Width},iw)':'min({scale.Height},ih)':force_original_aspect_ratio=decrease:force_divisible_by=2\""
             ]);
         }
 

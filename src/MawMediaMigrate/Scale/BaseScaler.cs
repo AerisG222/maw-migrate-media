@@ -23,9 +23,28 @@ abstract class BaseScaler
 
     public abstract Task<ScaleResult> Scale(FileInfo src, DirectoryInfo origMediaRoot);
 
-    protected static bool ShouldScale(int width, int height, ScaleSpec scale)
+    protected static IEnumerable<ScaleSpec> GetScalesForDimensions(int width, int height, bool includePosters)
     {
-        return width >= scale.Width || height >= scale.Height;
+        foreach (var scale in ScaleSpec.AllScales)
+        {
+            if (scale.IsPoster && !includePosters)
+            {
+                continue;
+            }
+
+            // if either dimension is greater than the scale bounds, scale it
+            if (width > scale.Width || height > scale.Height)
+            {
+                yield return scale;
+            }
+            else
+            {
+                // if we are here, the item fits in the scale bounds, return this last scale so that we can keep the
+                // highest res that fits
+                yield return scale;
+                yield break;
+            }
+        }
     }
 
     protected static void CreateDir(string dir)
