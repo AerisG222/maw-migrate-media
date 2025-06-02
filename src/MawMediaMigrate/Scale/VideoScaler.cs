@@ -20,19 +20,20 @@ class VideoScaler
 
         await Parallel.ForEachAsync(scales, async (scale, token) =>
         {
-            var dstPrefix = Path.Combine(
-                src.Directory!.Parent!.FullName.Replace(origMediaRoot.FullName, _destRootDir.FullName).FixupMediaDirectory(),
-                scale.Code,
-                Path.GetFileNameWithoutExtension(src.Name)
+            var dst = new FileInfo(
+                Path.Combine(
+                    src.Directory!.Parent!.FullName.Replace(origMediaRoot.FullName, _destRootDir.FullName).FixupMediaDirectory(),
+                    scale.Code,
+                    $"{Path.GetFileNameWithoutExtension(src.Name)}{(scale.IsPoster ? ".avif" : ".mp4")}"
+                )
             );
-            var dstFile = new FileInfo($"{dstPrefix}{(scale.IsPoster ? ".poster.avif" : ".mp4")}");
 
-            CreateDir(dstFile.DirectoryName!);
+            CreateDir(dst.DirectoryName!);
 
             var psi = new ProcessStartInfo
             {
                 FileName = "ffmpeg",
-                Arguments = GetFfmpegArgs(src.FullName, dstFile.FullName, scale),
+                Arguments = GetFfmpegArgs(src.FullName, dst.FullName, scale),
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
@@ -49,7 +50,7 @@ class VideoScaler
 
             lock (_lockObj)
             {
-                results.Add(new ScaledFile(scale, dstFile.FullName));
+                results.Add(new ScaledFile(scale, dst.FullName));
             }
         });
 

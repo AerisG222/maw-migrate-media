@@ -19,12 +19,17 @@ class DryRunVideoScaler
 
         foreach (var scale in scales)
         {
-            var dstPrefix = Path.Combine(src.Directory!.Parent!.FullName, scale.Code, Path.GetFileNameWithoutExtension(src.Name));
-            var dstFile = new FileInfo($"{dstPrefix}{(scale.IsPoster ? ".poster.avif" : ".mp4")}");
+            var dst = new FileInfo(
+                Path.Combine(
+                    src.Directory!.Parent!.FullName.Replace(origMediaRoot.FullName, _destRootDir.FullName).FixupMediaDirectory(),
+                    scale.Code,
+                    $"{Path.GetFileNameWithoutExtension(src.Name)}{(scale.IsPoster ? ".avif" : ".mp4")}"
+                )
+            );
 
             lock (_lockObj)
             {
-                results.Add(new ScaledFile(scale, dstFile.FullName));
+                results.Add(new ScaledFile(scale, dst.FullName));
             }
         }
         ;
