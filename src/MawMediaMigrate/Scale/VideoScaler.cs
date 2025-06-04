@@ -24,7 +24,7 @@ class VideoScaler
                 Path.Combine(
                     src.Directory!.Parent!.FullName.Replace(origMediaRoot.FullName, _destRootDir.FullName).FixupMediaDirectory(),
                     scale.Code,
-                    $"{Path.GetFileNameWithoutExtension(src.Name)}{(scale.IsPoster ? ".avif" : ".mp4")}"
+                    $"{Path.GetFileNameWithoutExtension(src.Name)}{(scale.IsPoster ? ".poster.avif" : ".mp4")}"
                 )
             );
 
