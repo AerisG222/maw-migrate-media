@@ -31,7 +31,7 @@ public class ResultWriter
     {
         var filePath = Path.Combine(_outdir.FullName, fileName);
 
-        await using var stream = File.Create(fileName);
+        await using var stream = File.Create(filePath);
         await JsonSerializer.SerializeAsync(stream, items, _jsonOptions);
     }
 }
