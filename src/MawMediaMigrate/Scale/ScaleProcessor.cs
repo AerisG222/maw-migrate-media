@@ -13,17 +13,13 @@ class ScaleProcessor
     {
         ArgumentNullException.ThrowIfNull(options);
 
-        IInspector inspector = options.DryRun
-            ? new DryRunInspector()
-            : new Inspector();
-
         _imageScaler = options.DryRun
-            ? new DryRunPhotoScaler(inspector, options.OrigDir, options.DestDir)
-            : new PhotoScaler(inspector, options.OrigDir, options.DestDir);
+            ? new DryRunPhotoScaler(options.Inspector, options.OrigDir, options.DestDir)
+            : new PhotoScaler(options.Inspector, options.OrigDir, options.DestDir);
 
         _videoScaler = options.DryRun
-            ? new DryRunVideoScaler(inspector, options.OrigDir, options.DestDir)
-            : new VideoScaler(inspector, options.OrigDir, options.DestDir);
+            ? new DryRunVideoScaler(options.Inspector, options.OrigDir, options.DestDir)
+            : new VideoScaler(options.Inspector, options.OrigDir, options.DestDir);
 
         _origDir = options.OrigDir;
     }

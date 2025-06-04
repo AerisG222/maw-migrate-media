@@ -15,20 +15,20 @@ class MoveProcessor
         ArgumentNullException.ThrowIfNull(options.OrigDir);
         ArgumentNullException.ThrowIfNull(options.DestDir);
 
-        _mover = options.DryRun ? new DryRunMover() : new Mover();
+        _mover = options.DryRun ? new DryRunMover() : new Mover(options.Inspector);
         _origDir = options.OrigDir;
         _destDir = options.DestDir;
     }
 
-    public IEnumerable<MoveResult> MoveFiles()
+    public async Task<IEnumerable<MoveResult>> MoveFiles()
     {
-        var imageResults = MoveOriginalMedia("images", "src");
-        var videoResults = MoveOriginalMedia("movies", "raw");
+        var imageResults = await MoveOriginalMedia("images", "src");
+        var videoResults = await MoveOriginalMedia("movies", "raw");
 
         return imageResults.Concat(videoResults);
     }
 
-    IEnumerable<MoveResult> MoveOriginalMedia(
+    async Task<IEnumerable<MoveResult>> MoveOriginalMedia(
         string origMediaDirName,
         string dirToMove
     )
@@ -43,13 +43,13 @@ class MoveProcessor
 
         var files = srcDir.EnumerateFiles("*", SearchOption.AllDirectories);
 
-        Parallel.ForEach(files, (file, token) =>
+        await Parallel.ForEachAsync(files, async (file, token) =>
         {
             if (string.Equals(dirToMove, file.Directory!.Name, StringComparison.OrdinalIgnoreCase))
             {
                 var destFile = BuildFileDest(srcDir, file);
 
-                var result = _mover.Move(file, destFile);
+                var result = await _mover.Move(file, destFile);
 
                 lock (_lockObj)
                 {

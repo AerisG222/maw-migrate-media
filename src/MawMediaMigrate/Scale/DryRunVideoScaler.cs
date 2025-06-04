@@ -29,7 +29,7 @@ class DryRunVideoScaler
 
             lock (_lockObj)
             {
-                results.Add(new ScaledFile(scale, dst.FullName));
+                results.Add(new ScaledFile(scale, dst.FullName, 100, 200, 300));
             }
         }
         ;

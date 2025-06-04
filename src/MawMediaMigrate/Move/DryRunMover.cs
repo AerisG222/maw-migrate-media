@@ -5,12 +5,17 @@ namespace MawMediaMigrate.Move;
 class DryRunMover
     : IMover
 {
-    public MoveResult Move(FileInfo src, FileInfo dst)
+    public Task<MoveResult> Move(FileInfo src, FileInfo dst)
     {
-        return new MoveResult
-        {
-            Src = src.FullName,
-            Dst = dst.FullName
-        };
+        return Task.FromResult(
+            new MoveResult
+            {
+                Src = src.FullName,
+                Dst = dst.FullName,
+                Width = 100,
+                Height = 200,
+                Bytes = 300
+            }
+        );
     }
 }

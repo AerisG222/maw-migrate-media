@@ -1,3 +1,5 @@
+using MawMediaMigrate.Scale;
+
 namespace MawMediaMigrate;
 
 class Options
@@ -6,6 +8,7 @@ class Options
     public required DirectoryInfo DestDir { get; init; }
     public required DirectoryInfo OutDir { get; init; }
     public bool DryRun { get; init; }
+    public required IInspector Inspector { get; init; }
 
     public static Options FromArgs(string[] args)
     {
@@ -48,8 +51,16 @@ class Options
             OrigDir = origDir,
             DestDir = destDir,
             OutDir = outDir,
-            DryRun = dryRun
+            DryRun = dryRun,
+            Inspector = dryRun
+                ? new DryRunInspector()
+                : new Inspector()
         };
+    }
+
+    Options()
+    {
+        // hide
     }
 
     static void ShowUsage()

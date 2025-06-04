@@ -48,9 +48,11 @@ class PhotoScaler
             process.Start();
             await process.WaitForExitAsync(token);
 
+            var (scaledWidth, scaledHeight) = await _inspector.QueryDimensions(dst.FullName);
+
             lock (_lockObj)
             {
-                results.Add(new ScaledFile(scale, dst.FullName));
+                results.Add(new ScaledFile(scale, dst.FullName, scaledWidth, scaledHeight, dst.Length));
             }
         });
 

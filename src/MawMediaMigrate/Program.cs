@@ -16,7 +16,7 @@ var exifProcessor = new ExifProcessor(opts);
 var writer = new ResultWriter(opts.OutDir);
 
 var scaledFiles = await scaleProcessor.ScaleFiles();
-var moveResults = moveProcessor.MoveFiles();
+var moveResults = await moveProcessor.MoveFiles();
 var exifResults = await exifProcessor.ExportExifData();
 
 await writer.WriteResults(moveResults, exifResults, scaledFiles);
