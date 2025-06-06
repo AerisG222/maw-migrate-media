@@ -569,6 +569,11 @@ public class TargetBuilder
         }
     }
 
+    // copied from MawMediaMigrate.StringExtensions
+    static string FixupMediaDirectory(string path) => path
+        .Replace(" ", "-")
+        .Replace("_", "-");
+
     void PrepareMediaFiles(
         IEnumerable<Photo> photos,
         IEnumerable<Video> videos
@@ -578,6 +583,14 @@ public class TargetBuilder
         {
             var media = _photoIdMap[photo.Id];
 
+            var srcPath = Path.Combine(
+                FixupMediaDirectory(
+                    Path.GetDirectoryName(photo.SrcPath!)!
+                        .Replace("/images/", "/media/")
+                ),
+                Path.GetFileName(photo.SrcPath!)
+            );
+
             var targetMediaFile = new Models.Target.MediaFile
             {
                 MediaId = media.Id,
@@ -586,8 +599,7 @@ public class TargetBuilder
                 Width = photo.SrcWidth,
                 Height = photo.SrcHeight,
                 Bytes = photo.SrcSize,
-                Path = photo.SrcPath!
-                    .Replace("/images/", "/media/")
+                Path = srcPath
             };
 
             _target.MediaFiles.Add(targetMediaFile);
@@ -597,6 +609,15 @@ public class TargetBuilder
         {
             var media = _videoIdMap[video.Id];
 
+            var srcPath = Path.Combine(
+                FixupMediaDirectory(
+                    Path.GetDirectoryName(video.RawPath!)!
+                        .Replace("/raw/", "/src/")
+                        .Replace("/movies/", "/media/")
+                ),
+                Path.GetFileName(video.RawPath!)
+            );
+
             var targetMediaFile = new Models.Target.MediaFile
             {
                 MediaId = media.Id,
@@ -605,9 +626,7 @@ public class TargetBuilder
                 Width = video.RawWidth,
                 Height = video.RawHeight,
                 Bytes = video.RawSize,
-                Path = video.RawPath!
-                    .Replace("/raw/", "/src/")
-                    .Replace("/movies/", "/media/")
+                Path = srcPath
             };
 
             _target.MediaFiles.Add(targetMediaFile);
