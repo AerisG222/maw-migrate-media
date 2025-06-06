@@ -80,7 +80,7 @@ public class TargetBuilder
     {
         foreach (var role in roles)
         {
-            var targetRole = role.ToTarget();
+            var targetRole = role.ToTarget(Admin.Id);
             _roleIdMap.Add(role.Id, targetRole.Id);
             _target.Roles.Add(targetRole);
         }

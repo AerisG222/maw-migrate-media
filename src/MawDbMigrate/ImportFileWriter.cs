@@ -432,10 +432,14 @@ public class ImportFileWriter
                 $"""
                 INSERT INTO media.role (
                     id,
-                    name
+                    name,
+                    created,
+                    created_by
                 ) VALUES (
                     {SqlAsString(role.Id)},
-                    {SqlString(role.Name)}
+                    {SqlString(role.Name)},
+                    {SqlString(role.Created.ToString("yyyy-MM-dd HH:mm:ss"))},
+                    {SqlAsString(role.CreatedBy)}
                 );
                 """);
         }
