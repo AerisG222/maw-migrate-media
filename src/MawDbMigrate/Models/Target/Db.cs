@@ -12,7 +12,7 @@ public class Db
     public List<Media> Media { get; } = [];
     public List<MediaFile> MediaFiles { get; } = [];
     public List<Comment> Comments { get; } = [];
-    public List<Rating> Ratings { get; } = [];
+    public List<Favorite> Favorites { get; } = [];
     public List<Location> Locations { get; } = [];
     public List<PointOfInterest> PointsOfInterest { get; } = [];
 }

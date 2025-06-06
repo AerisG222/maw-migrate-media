@@ -46,7 +46,7 @@ public class TargetBuilder
         PrepareMediaFiles(src.Photos, src.Videos);
         PrepareCategoryMedia(src.Photos, src.PhotoCategories, src.Videos, src.VideoCategories);
         PrepareComments(src.PhotoComments, src.VideoComments);
-        PrepareRatings(src.PhotoRatings, src.VideoRatings);
+        PrepareFavorites(src.PhotoRatings, src.VideoRatings);
         PrepareLocations(
             src.PhotoReverseGeocodes,
             src.Photos,
@@ -261,37 +261,33 @@ public class TargetBuilder
         }
     }
 
-    void PrepareRatings(
+    void PrepareFavorites(
         IEnumerable<PhotoRating> photoRatings,
         IEnumerable<VideoRating> videoRatings
     )
     {
         foreach (var rating in photoRatings)
         {
-            var targetRating = new Models.Target.Rating
+            var targetFavorite = new Models.Target.Favorite
             {
                 MediaId = _photoIdMap[rating.PhotoId].Id,
                 CreatedBy = _userIdMap[rating.UserId],
-                Created = DateTime.MinValue,
-                Modified = DateTime.MinValue,
-                Score = rating.Score
+                Created = DateTime.MinValue
             };
 
-            _target.Ratings.Add(targetRating);
+            _target.Favorites.Add(targetFavorite);
         }
 
         foreach (var rating in videoRatings)
         {
-            var targetRating = new Models.Target.Rating
+            var targetFavorite = new Models.Target.Favorite
             {
                 MediaId = _videoIdMap[rating.VideoId].Id,
                 CreatedBy = _userIdMap[rating.UserId],
-                Created = DateTime.MinValue,
-                Modified = DateTime.MinValue,
-                Score = rating.Score
+                Created = DateTime.MinValue
             };
 
-            _target.Ratings.Add(targetRating);
+            _target.Favorites.Add(targetFavorite);
         }
     }
 

@@ -27,7 +27,7 @@ public class ImportFileWriter
         await WriteSqlScript("media-files.sql", async (writer) => await WriteMediaFiles(writer, db.MediaFiles));
         await WriteSqlScript("category-media.sql", async (writer) => await WriteCategoryMedia(writer, db.CategoryMedia));
         await WriteSqlScript("comments.sql", async (writer) => await WriteComments(writer, db.Comments));
-        await WriteSqlScript("ratings.sql", async (writer) => await WriteRatings(writer, db.Ratings));
+        await WriteSqlScript("favorites.sql", async (writer) => await WriteFavorites(writer, db.Favorites));
 
         await WriteRunnerScript();
     }
@@ -66,7 +66,7 @@ public class ImportFileWriter
         await WriteRunScript(writer, "media-files.sql");
         await WriteRunScript(writer, "category-media.sql");
         await WriteRunScript(writer, "comments.sql");
-        await WriteRunScript(writer, "ratings.sql");
+        await WriteRunScript(writer, "favorites.sql");
     }
 
     async Task WriteRunScript(StreamWriter writer, string filename)
@@ -359,27 +359,23 @@ public class ImportFileWriter
         }
     }
 
-    async Task WriteRatings(StreamWriter writer, List<Rating> ratings)
+    async Task WriteFavorites(StreamWriter writer, List<Favorite> favorites)
     {
-        Console.WriteLine($"- writing {ratings.Count} ratings");
-        await WriteHeader(writer, $"RATINGS ({ratings.Count})");
+        Console.WriteLine($"- writing {favorites.Count} favorites");
+        await WriteHeader(writer, $"FAVORITES ({favorites.Count})");
 
-        foreach (var rating in ratings)
+        foreach (var favorite in favorites)
         {
             await writer.WriteLineAsync(
                 $"""
-                INSERT INTO media.rating (
+                INSERT INTO media.favorite (
                     media_id,
                     created_by,
-                    created,
-                    modified,
-                    rating
+                    created
                 ) VALUES (
-                    {SqlAsString(rating.MediaId)},
-                    {SqlAsString(rating.CreatedBy)},
-                    {SqlString(rating.Created.ToString("yyyy-MM-dd HH:mm:ss"))},
-                    {SqlString(rating.Modified.ToString("yyyy-MM-dd HH:mm:ss"))},
-                    {SqlNonString(rating.Score)}
+                    {SqlAsString(favorite.MediaId)},
+                    {SqlAsString(favorite.CreatedBy)},
+                    {SqlString(favorite.Created.ToString("yyyy-MM-dd HH:mm:ss"))}
                 );
                 """);
         }
