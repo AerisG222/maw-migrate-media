@@ -16,6 +16,21 @@
             "stopAtEntry": false
         },
         {
+            "name": "Debug MawMediaMigrate",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "buildMawMediaMigrate",
+            "program": "${workspaceFolder}/src/MawMediaMigrate/bin/Debug/net9.0/MawMediaMigrate",
+            "args": [
+                "/srv/www/mover-test/website_assets",
+                "/srv/www/mover-test/media",
+                "/srv/www/mover-test"
+            ],
+            "cwd": "${workspaceFolder}/src/MawMediaMigrate",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
             "name": "Debug MawMediaSqlUpdate",
             "type": "coreclr",
             "request": "launch",
