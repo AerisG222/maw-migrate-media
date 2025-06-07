@@ -7,15 +7,12 @@ class MediaRepo
     readonly Dictionary<string, string> _oldSrcToNewSrcDict = [];
     readonly Dictionary<string, MediaInfo> _dict = [];
     readonly DirectoryInfo _origMediaDir;
-    readonly DirectoryInfo _destMediaDir;
 
-    public MediaRepo(DirectoryInfo origMediaDir, DirectoryInfo destMediaDir)
+    public MediaRepo(DirectoryInfo origMediaDir)
     {
         ArgumentNullException.ThrowIfNull(origMediaDir);
-        ArgumentNullException.ThrowIfNull(destMediaDir);
 
         _origMediaDir = origMediaDir;
-        _destMediaDir = destMediaDir;
     }
 
     public void AssembleMediaInfo(
@@ -29,6 +26,8 @@ class MediaRepo
         AddExifInfo(exifResults);
         AddScaleInfo(scaledFiles);
     }
+
+    public IEnumerable<MediaInfo> GetMediaInfos() => _dict.Values;
 
     void AddMoveInfo(IEnumerable<MoveResult> results)
     {
