@@ -122,41 +122,52 @@ class SqlWriter
                 : "video";
 
         await writer.WriteLineAsync($"""
-            INSERT INTO media.media_file
-            (
-                media_id,
-                media_type_id,
-                scale_id,
-                width,
-                height,
-                bytes,
-                path
-            )
-            VALUES
-            (
-                (
-                    SELECT f.media_id
+            IF EXISTS (
+                SELECT f.media_id
                     FROM media.media_file f
                     INNER JOIN media.scale s
                         ON s.id = f.scale_id
                         AND s.code = 'src'
                         AND f.path = '{srcPath}'
-                ),
+            ) THEN
+                INSERT INTO media.media_file
                 (
-                    SELECT id
-                    FROM media.media_type
-                    WHERE name  = '{typeName}'
-                ),
+                    media_id,
+                    media_type_id,
+                    scale_id,
+                    width,
+                    height,
+                    bytes,
+                    path
+                )
+                VALUES
                 (
-                    SELECT id
-                    FROM media.scale
-                    WHERE code = '{file.Scale.Code}'
-                ),
-                {file.Width},
-                {file.Height},
-                {file.Bytes},
-                '{scalePath}'
-            );
+                    (
+                        SELECT f.media_id
+                        FROM media.media_file f
+                        INNER JOIN media.scale s
+                            ON s.id = f.scale_id
+                            AND s.code = 'src'
+                            AND f.path = '{srcPath}'
+                    ),
+                    (
+                        SELECT id
+                        FROM media.media_type
+                        WHERE name  = '{typeName}'
+                    ),
+                    (
+                        SELECT id
+                        FROM media.scale
+                        WHERE code = '{file.Scale.Code}'
+                    ),
+                    {file.Width},
+                    {file.Height},
+                    {file.Bytes},
+                    '{scalePath}'
+                );
+            ELSE
+                RAISE NOTICE 'src not found: {srcPath}';
+            END IF;
 
             """
         );
