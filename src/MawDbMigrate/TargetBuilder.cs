@@ -584,12 +584,10 @@ public class TargetBuilder
             var media = _photoIdMap[photo.Id];
 
             var srcPath = Path.Combine(
-                FixupMediaDirectory(
-                    Path.GetDirectoryName(photo.SrcPath!)!
-                        .Replace("/images/", "/media/")
-                ),
+                FixupMediaDirectory(Path.GetDirectoryName(photo.SrcPath!)!),
                 Path.GetFileName(photo.SrcPath!)
-            );
+            )
+            .Replace("/images/", "/media/");
 
             var targetMediaFile = new Models.Target.MediaFile
             {
@@ -610,13 +608,11 @@ public class TargetBuilder
             var media = _videoIdMap[video.Id];
 
             var srcPath = Path.Combine(
-                FixupMediaDirectory(
-                    Path.GetDirectoryName(video.RawPath!)!
-                        .Replace("/raw/", "/src/")
-                        .Replace("/movies/", "/media/")
-                ),
+                FixupMediaDirectory(Path.GetDirectoryName(video.RawPath!)!),
                 Path.GetFileName(video.RawPath!)
-            );
+            )
+            .Replace("/raw/", "/src/")
+            .Replace("/movies/", "/media/");
 
             var targetMediaFile = new Models.Target.MediaFile
             {
