@@ -1,8 +1,11 @@
+using MawMediaMigrate.Results;
+
 namespace MawMediaSqlUpdate;
 
 class SqlWriter
 {
-    const string SQL_FILE = "update_media.sql";
+    const string SQL_EXIF_FILE = "update_exif.sql";
+    const string SQL_SCALE_FILE = "update_scale.sql";
     readonly DirectoryInfo _outputDir;
     readonly DirectoryInfo _destMediaDir;
 
@@ -19,31 +22,58 @@ class SqlWriter
     {
         _outputDir.Create();
 
-        await WriteSqlFile(mediaInfos);
+        await WriteExifSqlFile(mediaInfos);
+        await WriteScaleSqlFile(mediaInfos);
         await WriteRunnerScript();
     }
 
-    async Task WriteSqlFile(IEnumerable<MediaInfo> mediaInfos)
+    async Task WriteExifSqlFile(IEnumerable<MediaInfo> mediaInfos)
     {
-        using var writer = new StreamWriter(Path.Combine(_outputDir.FullName, SQL_FILE));
+        using var writer = new StreamWriter(Path.Combine(_outputDir.FullName, SQL_EXIF_FILE));
 
-        await WriteBody(writer, mediaInfos);
+        // no pre/post amble as it seems to break using \set
+        await WriteExifBody(writer, mediaInfos);
 
         await writer.FlushAsync();
         writer.Close();
     }
 
-    async Task WriteBody(StreamWriter writer, IEnumerable<MediaInfo> mediaInfos)
+    async Task WriteScaleSqlFile(IEnumerable<MediaInfo> mediaInfos)
+    {
+        using var writer = new StreamWriter(Path.Combine(_outputDir.FullName, SQL_SCALE_FILE));
+
+        await WritePreamble(writer);
+        await WriteScaleBody(writer, mediaInfos);
+        await WritePostamble(writer);
+
+        await writer.FlushAsync();
+        writer.Close();
+    }
+
+    async Task WriteExifBody(StreamWriter writer, IEnumerable<MediaInfo> mediaInfos)
     {
         foreach (var mi in mediaInfos)
         {
-            await WriteMediaInfo(writer, mi);
+            await WriteExifMediaInfo(writer, mi);
         }
     }
 
-    async Task WriteMediaInfo(StreamWriter writer, MediaInfo mi)
+    async Task WriteScaleBody(StreamWriter writer, IEnumerable<MediaInfo> mediaInfos)
+    {
+        foreach (var mi in mediaInfos)
+        {
+            await WriteScaleMediaInfo(writer, mi);
+        }
+    }
+
+    async Task WriteExifMediaInfo(StreamWriter writer, MediaInfo mi)
     {
         await WriteExifUpdate(writer, mi);
+    }
+
+    async Task WriteScaleMediaInfo(StreamWriter writer, MediaInfo mi)
+    {
+        await WriteScaleUpdates(writer, mi);
     }
 
     async Task WriteExifUpdate(StreamWriter writer, MediaInfo mi)
@@ -73,26 +103,111 @@ class SqlWriter
         );
     }
 
+    async Task WriteScaleUpdates(StreamWriter writer, MediaInfo mi)
+    {
+        foreach (var scale in mi.ScaledFiles)
+        {
+            await WriteScaleUpdate(writer, mi, scale);
+        }
+    }
+
+    async Task WriteScaleUpdate(StreamWriter writer, MediaInfo mi, ScaledFile file)
+    {
+        var srcPath = mi.DestinationSrcPath.Replace(_destMediaDir.Parent!.FullName, string.Empty);
+        var scalePath = file.Path.Replace(_destMediaDir.Parent!.FullName, string.Empty);
+        var typeName = file.Scale.IsPoster
+            ? "video-poster"
+            : string.Equals(Path.GetExtension(file.Path), ".avif", StringComparison.OrdinalIgnoreCase)
+                ? "photo"
+                : "video";
+
+        await writer.WriteLineAsync($"""
+            INSERT INTO media.media_file
+            (
+                media_id,
+                media_type_id,
+                scale_id,
+                width,
+                height,
+                bytes,
+                path
+            )
+            VALUES
+            (
+                (
+                    SELECT f.media_id
+                    FROM media.media_file f
+                    INNER JOIN media.scale s
+                        ON s.id = f.scale_id
+                        AND s.code = 'src'
+                        AND f.path = '{srcPath}'
+                ),
+                (
+                    SELECT id
+                    FROM media.media_type
+                    WHERE name  = '{typeName}'
+                ),
+                (
+                    SELECT id
+                    FROM media.scale
+                    WHERE code = '{file.Scale.Code}'
+                ),
+                {file.Width},
+                {file.Height},
+                {file.Bytes},
+                '{scalePath}'
+            );
+
+            """
+        );
+    }
+
     async Task WriteRunnerScript()
     {
         var outfile = Path.Combine(_outputDir.FullName, "import.sh");
         using var writer = new StreamWriter(outfile);
 
-        // currently we expect to run this directly on system where media was migrated as it needs
-        // access to the generated json files...
+        await writer.WriteLineAsync("#!/bin/bash");
+        await writer.WriteLineAsync("");
+        await WritePodmanExecuteScript(writer, SQL_EXIF_FILE);
+        await writer.WriteLineAsync("");
+        await WritePodmanExecuteScript(writer, SQL_SCALE_FILE);
+
+        await writer.FlushAsync();
+        writer.Close();
+    }
+
+    async Task WritePodmanExecuteScript(StreamWriter writer, string importFile)
+    {
         await writer.WriteLineAsync(
             $"""
-            #!/bin/bash
-
             psql \
                 --host localhost \
                 --port 6543 \
                 --username svc_maw_media \
                 --dbname maw_media \
-                --file "{SQL_FILE}"
+                --file "{importFile}"
             """);
+    }
 
-        await writer.FlushAsync();
-        writer.Close();
+    async Task WritePreamble(StreamWriter writer)
+    {
+        await writer.WriteLineAsync(
+            """
+            DO
+            $$
+            BEGIN
+
+            """);
+    }
+
+    async Task WritePostamble(StreamWriter writer)
+    {
+        await writer.WriteLineAsync(
+            """
+            END
+            $$
+
+            """);
     }
 }
