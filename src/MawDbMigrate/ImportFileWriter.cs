@@ -48,7 +48,7 @@ public class ImportFileWriter
         await writer.WriteLineAsync(
             """
             #!/bin/bash
-            POD=$1         # dev-api-pod
+            POD=$1         # dev-media-pod
             PGPORT=$2      # 5432
             ENVPGDATA=$3   # /home/mmorano/maw-api-dev/data/pgpwd
 
