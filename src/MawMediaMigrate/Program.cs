@@ -6,10 +6,6 @@ using MawMediaMigrate.Results.Writer;
 
 var opts = Options.FromArgs(args);
 
-// note: dry-run currently doesn't work as some steps expect that directories are created / files are moved
-// not going to build out the rest of that now as its not currently worth the time, but will leave here
-// in case it becoms useful in the future =|
-
 var scaleProcessor = new ScaleProcessor(opts);
 var moveProcessor = new MoveProcessor(opts);
 var exifProcessor = new ExifProcessor(opts);

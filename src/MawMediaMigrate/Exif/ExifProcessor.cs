@@ -5,6 +5,7 @@ namespace MawMediaMigrate.Exif;
 class ExifProcessor
 {
     readonly Lock _lockObj = new();
+    readonly bool _isDryRun;
     readonly IExifExporter _exporter;
     readonly DirectoryInfo _mediaRoot;
 
@@ -12,6 +13,7 @@ class ExifProcessor
     {
         ArgumentNullException.ThrowIfNull(options);
 
+        _isDryRun = options.DryRun;
         _exporter = options.DryRun ? new DryRunExifExporter() : new ExifExporter();
 
         // this runs after moving, so use the dest dir - this also makes sure that the exif file path info reflects changes to dir names/etc.
@@ -20,6 +22,11 @@ class ExifProcessor
 
     public async Task<IEnumerable<ExifResult>> ExportExifData()
     {
+        if (_isDryRun)
+        {
+            return [];
+        }
+
         var list = new List<ExifResult>();
         var files = _mediaRoot.EnumerateFiles("*", SearchOption.AllDirectories);
 
