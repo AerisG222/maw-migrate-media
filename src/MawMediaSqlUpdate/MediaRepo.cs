@@ -54,7 +54,15 @@ class MediaRepo
             // video src/raw files should match up, so try to to look that up first
             if (!_dict.TryGetValue(result.SrcPath, out var mi))
             {
-                mi = GetMediaInfoByAlternateKey(result.SrcPath);
+                try
+                {
+                    mi = GetMediaInfoByAlternateKey(result.SrcPath);
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine($"** did not find: {result.SrcPath}");
+                    continue;
+                }
             }
 
             mi.ScaledFiles = result.ScaledFiles;

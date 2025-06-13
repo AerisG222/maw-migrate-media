@@ -26,11 +26,11 @@ class Options
             Environment.Exit(2);
         }
 
-        if (!destMediaDir.Exists)
-        {
-            Console.WriteLine("Invalid destination media directory specified.");
-            Environment.Exit(3);
-        }
+        // if (!destMediaDir.Exists)
+        // {
+        //     Console.WriteLine("Invalid destination media directory specified.");
+        //     Environment.Exit(3);
+        // }
 
         return new Options
         {

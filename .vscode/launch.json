@@ -37,10 +37,10 @@
             "preLaunchTask": "buildMawMediaSqlUpdate",
             "program": "${workspaceFolder}/src/MawMediaSqlUpdate/bin/Debug/net9.0/MawMediaSqlUpdate",
             "args": [
-                "/srv/www/mover-test/website_assets",
-                "/srv/www/mover-test/media",
-                "/srv/www/mover-test",
-                "/srv/www/mover-test"
+                "/data/www/website_assets",
+                "/data/www/media",
+                "/home/mmorano/git/maw-migrate-media/output/dryrun",
+                "/home/mmorano/git/maw-migrate-media/output/dryrun"
             ],
             "cwd": "${workspaceFolder}/src/MawMediaSqlUpdate",
             "console": "internalConsole",
