@@ -4,8 +4,9 @@ namespace MawMediaSqlUpdate;
 
 class SqlWriter
 {
-    const string SQL_EXIF_FILE = "update_exif.sql";
-    const string SQL_SCALE_FILE = "update_scale.sql";
+    const int RECORDS_PER_FILE = 10_000;
+    readonly List<string> _sqlExifFiles = [];
+    readonly List<string> _sqlScaleFiles = [];
     readonly DirectoryInfo _outputDir;
     readonly DirectoryInfo _destMediaDir;
 
@@ -22,58 +23,53 @@ class SqlWriter
     {
         _outputDir.Create();
 
-        await WriteExifSqlFile(mediaInfos);
-        await WriteScaleSqlFile(mediaInfos);
+        await WriteSqlFiles(mediaInfos);
         await WriteRunnerScript();
     }
 
-    async Task WriteExifSqlFile(IEnumerable<MediaInfo> mediaInfos)
+    async Task WriteSqlFiles(IEnumerable<MediaInfo> mediaInfos)
     {
-        using var writer = new StreamWriter(Path.Combine(_outputDir.FullName, SQL_EXIF_FILE));
+        var id = 0;
+        var fileId = 0;
+        StreamWriter? exifWriter = null;
+        StreamWriter? scaleWriter = null;
 
-        // no pre/post amble as it seems to break using \set
-        await WriteExifBody(writer, mediaInfos);
-
-        await writer.FlushAsync();
-        writer.Close();
-    }
-
-    async Task WriteScaleSqlFile(IEnumerable<MediaInfo> mediaInfos)
-    {
-        using var writer = new StreamWriter(Path.Combine(_outputDir.FullName, SQL_SCALE_FILE));
-
-        await WritePreamble(writer);
-        await WriteScaleBody(writer, mediaInfos);
-        await WritePostamble(writer);
-
-        await writer.FlushAsync();
-        writer.Close();
-    }
-
-    async Task WriteExifBody(StreamWriter writer, IEnumerable<MediaInfo> mediaInfos)
-    {
         foreach (var mi in mediaInfos)
         {
-            await WriteExifMediaInfo(writer, mi);
+            if (id % RECORDS_PER_FILE == 0)
+            {
+                if (exifWriter != null)
+                {
+                    await exifWriter.FlushAsync();
+                    exifWriter.Close();
+                    exifWriter.Dispose();
+                }
+
+                if (scaleWriter != null)
+                {
+                    await WritePostamble(scaleWriter);
+                    await scaleWriter.FlushAsync();
+                    scaleWriter.Close();
+                    scaleWriter.Dispose();
+                }
+
+                fileId++;
+
+                var exifFilename = Path.Combine(_outputDir.FullName, $"exif_{fileId:00#}.sql");
+                _sqlExifFiles.Add(exifFilename);
+                exifWriter = new StreamWriter(exifFilename);
+
+                var scaleFilename = Path.Combine(_outputDir.FullName, $"scale_{fileId:00#}.sql");
+                _sqlScaleFiles.Add(scaleFilename);
+                scaleWriter = new StreamWriter(scaleFilename);
+                await WritePreamble(scaleWriter);
+            }
+
+            await WriteExifUpdate(exifWriter!, mi);
+            await WriteScaleUpdates(scaleWriter!, mi);
+
+            id++;
         }
-    }
-
-    async Task WriteScaleBody(StreamWriter writer, IEnumerable<MediaInfo> mediaInfos)
-    {
-        foreach (var mi in mediaInfos)
-        {
-            await WriteScaleMediaInfo(writer, mi);
-        }
-    }
-
-    async Task WriteExifMediaInfo(StreamWriter writer, MediaInfo mi)
-    {
-        await WriteExifUpdate(writer, mi);
-    }
-
-    async Task WriteScaleMediaInfo(StreamWriter writer, MediaInfo mi)
-    {
-        await WriteScaleUpdates(writer, mi);
     }
 
     async Task WriteExifUpdate(StreamWriter writer, MediaInfo mi)
@@ -180,25 +176,34 @@ class SqlWriter
 
         await writer.WriteLineAsync("#!/bin/bash");
         await writer.WriteLineAsync("");
-        await WritePodmanExecuteScript(writer, SQL_EXIF_FILE);
+        await writer.WriteLineAsync("export PGPASSWORD=");
         await writer.WriteLineAsync("");
-        await WritePodmanExecuteScript(writer, SQL_SCALE_FILE);
+        await writer.WriteLineAsync("export PGHOST=localhost");
+        await writer.WriteLineAsync("export PGPORT=6543");
+        await writer.WriteLineAsync("export PGDATABASE=maw_media");
+        await writer.WriteLineAsync("export PGUSER=svc_maw_media");
+        await writer.WriteLineAsync("");
+
+        await WriteScripts(writer, _sqlExifFiles);
+        await writer.WriteLineAsync("");
+        await WriteScripts(writer, _sqlScaleFiles);
 
         await writer.FlushAsync();
         writer.Close();
     }
 
+    async Task WriteScripts(StreamWriter writer, IEnumerable<string> files)
+    {
+        foreach (var file in files)
+        {
+            await WritePodmanExecuteScript(writer, file);
+        }
+    }
+
+
     async Task WritePodmanExecuteScript(StreamWriter writer, string importFile)
     {
-        await writer.WriteLineAsync(
-            $"""
-            psql \
-                --host localhost \
-                --port 6543 \
-                --username svc_maw_media \
-                --dbname maw_media \
-                --file "{importFile}"
-            """);
+        await writer.WriteLineAsync($"psql --file '{importFile}'");
     }
 
     async Task WritePreamble(StreamWriter writer)
