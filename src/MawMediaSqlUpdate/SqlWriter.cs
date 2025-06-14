@@ -52,6 +52,101 @@ class SqlWriter
 
         await TerminateExifWriter(exifWriter);
         await TerminateScaleWriter(scaleWriter);
+
+        await WriteMediaFileInsertScript();
+        await WriteScaleMissingScript();
+        await WriteCleanupScript();
+    }
+
+    async Task WriteMediaFileInsertScript()
+    {
+        var file = Path.Combine(_outputDir.FullName, $"scale_apply.sql");
+
+        _sqlScaleFiles.Add(file);
+
+        var sw = new StreamWriter(file);
+
+        await WritePreamble(sw);
+
+        await sw.WriteLineAsync(
+            $"""
+            INSERT INTO media.media_file
+            (
+                media_id,
+                media_type_id,
+                scale_id,
+                width,
+                height,
+                bytes,
+                path
+            )
+            SELECT
+                mf.media_id,
+                mt.id AS media_type_id,
+                ms.id AS scale_id,
+                tmf.width,
+                tmf.height,
+                tmf.bytes,
+                tmf.path
+            FROM media.tmpmediafile tmf
+            INNER JOIN media.media_file mf
+                ON mf.path = tmf.srcpath
+            INNER JOIN media.scale ms
+                ON ms.code = tmf.scalecode
+            INNER JOIN media.media_type mt
+                ON mt.name = tmf.typename;
+
+            """
+        );
+
+        await TerminateWriter(sw, true);
+    }
+
+    async Task WriteScaleMissingScript()
+    {
+        var file = Path.Combine(_outputDir.FullName, $"scale_report.sql");
+
+        _sqlScaleFiles.Add(file);
+
+        var sw = new StreamWriter(file);
+
+        await sw.WriteLineAsync(
+            $"""
+            SELECT DISTINCT
+                tmf.srcpath
+            FROM media.tmpmediafile tmf
+            LEFT OUTER JOIN media.media_file mf
+                ON mf.path = tmf.srcpath
+            WHERE mf.media_id IS NULL;
+
+            """
+        );
+
+        await TerminateWriter(sw, false);
+    }
+
+    async Task WriteCleanupScript()
+    {
+        var file = Path.Combine(_outputDir.FullName, $"cleanup.sql");
+
+        // dont include this by default to allow for more investigation if needed
+        //_sqlScaleFiles.Add(file);
+
+        var sw = new StreamWriter(file);
+
+        await WritePreamble(sw);
+
+        await sw.WriteLineAsync(
+            $"""
+            DROP TABLE media.tmpmediafile;
+
+            VACCUUM;
+            ANALYZE;
+
+            """
+        );
+
+        await TerminateWriter(sw, true);
     }
 
     async Task<StreamWriter> PrepareExifWriter(StreamWriter? sw, int fileId)
