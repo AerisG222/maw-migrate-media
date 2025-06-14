@@ -38,31 +38,10 @@ class SqlWriter
         {
             if (id % RECORDS_PER_FILE == 0)
             {
-                if (exifWriter != null)
-                {
-                    await exifWriter.FlushAsync();
-                    exifWriter.Close();
-                    exifWriter.Dispose();
-                }
-
-                if (scaleWriter != null)
-                {
-                    await WritePostamble(scaleWriter);
-                    await scaleWriter.FlushAsync();
-                    scaleWriter.Close();
-                    scaleWriter.Dispose();
-                }
-
                 fileId++;
 
-                var exifFilename = Path.Combine(_outputDir.FullName, $"exif_{fileId:00#}.sql");
-                _sqlExifFiles.Add(exifFilename);
-                exifWriter = new StreamWriter(exifFilename);
-
-                var scaleFilename = Path.Combine(_outputDir.FullName, $"scale_{fileId:00#}.sql");
-                _sqlScaleFiles.Add(scaleFilename);
-                scaleWriter = new StreamWriter(scaleFilename);
-                await WritePreamble(scaleWriter);
+                exifWriter = await PrepareExifWriter(exifWriter, fileId);
+                scaleWriter = await PrepareScaleWriter(scaleWriter, fileId);
             }
 
             await WriteExifUpdate(exifWriter!, mi);
@@ -70,6 +49,85 @@ class SqlWriter
 
             id++;
         }
+
+        await TerminateExifWriter(exifWriter);
+        await TerminateScaleWriter(scaleWriter);
+    }
+
+    async Task<StreamWriter> PrepareExifWriter(StreamWriter? sw, int fileId)
+    {
+        if (sw != null)
+        {
+            await TerminateWriter(sw, false);
+        }
+
+        var exifFilename = Path.Combine(_outputDir.FullName, $"exif_{fileId:00#}.sql");
+
+        _sqlExifFiles.Add(exifFilename);
+
+        return new StreamWriter(exifFilename);
+    }
+
+    async Task TerminateExifWriter(StreamWriter? sw)
+    {
+        if (sw != null)
+        {
+            await TerminateWriter(sw, false);
+        }
+    }
+
+    async Task<StreamWriter> PrepareScaleWriter(StreamWriter? sw, int fileId)
+    {
+        if (sw != null)
+        {
+            await TerminateWriter(sw, true);
+        }
+
+        var scaleFilename = Path.Combine(_outputDir.FullName, $"scale_{fileId:00#}.sql");
+
+        _sqlScaleFiles.Add(scaleFilename);
+
+        sw = new StreamWriter(scaleFilename);
+
+        await WritePreamble(sw);
+
+        await sw.WriteLineAsync(
+            $"""
+            CREATE TABLE IF NOT EXISTS media.tmpmediafile
+            (
+                srcpath TEXT,
+                typename TEXT,
+                scalecode TEXT,
+                width INTEGER,
+                height INTEGER,
+                bytes BIGINT,
+                path TEXT
+            );
+
+            """
+        );
+
+        return sw;
+    }
+
+    async Task TerminateScaleWriter(StreamWriter? sw)
+    {
+        if (sw != null)
+        {
+            await TerminateWriter(sw, true);
+        }
+    }
+
+    async Task TerminateWriter(StreamWriter sw, bool addPostamble)
+    {
+        if (addPostamble)
+        {
+            await WritePostamble(sw);
+        }
+
+        await sw.FlushAsync();
+        sw.Close();
+        sw.Dispose();
     }
 
     async Task WriteExifUpdate(StreamWriter writer, MediaInfo mi)
@@ -81,7 +139,8 @@ class SqlWriter
 
         var path = mi.DestinationSrcPath.Replace(_destMediaDir.Parent!.FullName, string.Empty);
 
-        await writer.WriteLineAsync($"""
+        await writer.WriteLineAsync(
+            $"""
             \set media_metadata `cat {mi.ExifFile}`
 
             UPDATE media.media
@@ -117,53 +176,28 @@ class SqlWriter
                 ? "photo"
                 : "video";
 
-        await writer.WriteLineAsync($"""
-            IF EXISTS (
-                SELECT f.media_id
-                    FROM media.media_file f
-                    INNER JOIN media.scale s
-                        ON s.id = f.scale_id
-                        AND s.code = 'src'
-                        AND f.path = '{srcPath}'
-            ) THEN
-                INSERT INTO media.media_file
-                (
-                    media_id,
-                    media_type_id,
-                    scale_id,
-                    width,
-                    height,
-                    bytes,
-                    path
-                )
-                VALUES
-                (
-                    (
-                        SELECT f.media_id
-                        FROM media.media_file f
-                        INNER JOIN media.scale s
-                            ON s.id = f.scale_id
-                            AND s.code = 'src'
-                            AND f.path = '{srcPath}'
-                    ),
-                    (
-                        SELECT id
-                        FROM media.media_type
-                        WHERE name  = '{typeName}'
-                    ),
-                    (
-                        SELECT id
-                        FROM media.scale
-                        WHERE code = '{file.Scale.Code}'
-                    ),
-                    {file.Width},
-                    {file.Height},
-                    {file.Bytes},
-                    '{scalePath}'
-                );
-            ELSE
-                RAISE NOTICE 'src not found: {srcPath}';
-            END IF;
+        await writer.WriteLineAsync(
+            $"""
+            INSERT INTO media.tmpmediafile
+            (
+                srcpath,
+                typename,
+                scalecode,
+                width,
+                height,
+                bytes,
+                path
+            )
+            VALUES
+            (
+                '{srcPath}',
+                '{typeName}',
+                '{file.Scale.Code}',
+                {file.Width},
+                {file.Height},
+                {file.Bytes},
+                '{scalePath}'
+            );
 
             """
         );
@@ -176,12 +210,12 @@ class SqlWriter
 
         await writer.WriteLineAsync("#!/bin/bash");
         await writer.WriteLineAsync("");
-        await writer.WriteLineAsync("export PGPASSWORD=");
+        await writer.WriteLineAsync("export PGPASSWORD='<SET_PWD_HERE>'");
         await writer.WriteLineAsync("");
         await writer.WriteLineAsync("export PGHOST=localhost");
         await writer.WriteLineAsync("export PGPORT=6543");
         await writer.WriteLineAsync("export PGDATABASE=maw_media");
-        await writer.WriteLineAsync("export PGUSER=svc_maw_media");
+        await writer.WriteLineAsync("export PGUSER=postgres");
         await writer.WriteLineAsync("");
 
         await WriteScripts(writer, _sqlExifFiles);
@@ -214,7 +248,8 @@ class SqlWriter
             $$
             BEGIN
 
-            """);
+            """
+        );
     }
 
     async Task WritePostamble(StreamWriter writer)
@@ -224,6 +259,7 @@ class SqlWriter
             END
             $$
 
-            """);
+            """
+        );
     }
 }
