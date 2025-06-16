@@ -2,20 +2,15 @@
 
 The following tools will help manage different parts of the restructuring of the media.
 
-## MaW DB Migrate Tool
+## Step 1: MaWDbMigrate
 
 Silly little tool to migrate data to new schema.
 
-## MawMediaMigrate
+## Step 2: MawMediaMigrate
 
 Tool to move / rename / resize files to the new structure and sizes.
-Will likely rescale images to new dimensions in avif
-Will likely rescale videos to new dimensions in av1
+This also runs exiftool for all 'src' media to export a json file to be later loaded into the new media database
 
-## MawExifExport
+## Step 3: MawMediaSqlUpdate
 
-Runs exiftool for all 'src' media to export a json file to be later loaded into the new media database
-
-## MawExifImport
-
-TBD - Tool to import exif json documents into pg
+Tool to update database based on results of the media migration tool.
