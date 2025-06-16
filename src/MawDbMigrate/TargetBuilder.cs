@@ -107,20 +107,20 @@ public class TargetBuilder
     )
     {
         var pc = photoCategories
-            .OrderBy(x => x.SortKey)
+            .OrderBy(x => x.EffectiveDate)
             .ToList();
 
         var vc = videoCategories
-            .OrderBy(x => x.SortKey)
+            .OrderBy(x => x.EffectiveDate)
             .ToList();
 
         var pcIdx = 0;
         var vcIdx = 0;
 
-        // merge these chronologically
+        // merge these chronologically and artificially adjust effective date if needed to try to retain current sort order
         while (pcIdx < pc.Count || vcIdx < vc.Count)
         {
-            if (pcIdx >= pc.Count || (vcIdx < vc.Count && vc[vcIdx].SortKey < pc[pcIdx].SortKey))
+            if (pcIdx >= pc.Count || (vcIdx < vc.Count && vc[vcIdx].EffectiveDate < pc[pcIdx].EffectiveDate))
             {
                 var category = vc[vcIdx];
                 var targetCategory = category.ToTarget(Admin.Id);

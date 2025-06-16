@@ -13,8 +13,8 @@ public static class CategoryExtensions
         {
             Id = Guid.CreateVersion7(),
             Name = category.Name,
-            EffectiveDate = category.CreateDate,   // ?? TODO ??
-            Created = category.CreateDate,
+            EffectiveDate = category.EffectiveDate,
+            Created = category.EffectiveDate,
             CreatedBy = userId,
             Modified = DateTime.MinValue,
             ModifiedBy = userId,
@@ -32,8 +32,8 @@ public static class CategoryExtensions
         {
             Id = Guid.CreateVersion7(),
             Name = category.Name,
-            EffectiveDate = category.CreateDate,  //  ?? TODO ??
-            Created = category.CreateDate,
+            EffectiveDate = category.EffectiveDate,
+            Created = category.EffectiveDate,
             CreatedBy = userId,
             Modified = DateTime.MinValue,
             ModifiedBy = userId,
