@@ -50,7 +50,7 @@ public class ImportFileWriter
             #!/bin/bash
             POD=$1         # dev-media-pod
             PGPORT=$2      # 5432
-            ENVPGDATA=$3   # /home/mmorano/maw-api-dev/data/pgpwd
+            ENVPGDATA=$3   # /home/mmorano/maw/dev/media/data/pgpwd
 
             """);
 
@@ -250,7 +250,7 @@ public class ImportFileWriter
                 $"""
                 INSERT INTO media.media (
                     id,
-                    media_type_id,
+                    type_id,
                     location_id,
                     location_override_id,
                     created,
@@ -280,9 +280,9 @@ public class ImportFileWriter
         {
             await writer.WriteLineAsync(
                 $"""
-                INSERT INTO media.media_file (
+                INSERT INTO media.file (
                     media_id,
-                    media_type_id,
+                    type_id,
                     scale_id,
                     width,
                     height,
