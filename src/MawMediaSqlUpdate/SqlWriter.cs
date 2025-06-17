@@ -70,10 +70,10 @@ class SqlWriter
 
         await sw.WriteLineAsync(
             $"""
-            INSERT INTO media.media_file
+            INSERT INTO media.file
             (
                 media_id,
-                media_type_id,
+                type_id,
                 scale_id,
                 width,
                 height,
@@ -82,19 +82,19 @@ class SqlWriter
             )
             SELECT
                 mf.media_id,
-                mt.id AS media_type_id,
+                mt.id AS type_id,
                 ms.id AS scale_id,
                 tmf.width,
                 tmf.height,
                 tmf.bytes,
                 tmf.path
             FROM media.tmpmediafile tmf
-            INNER JOIN media.media_file mf
+            INNER JOIN media.file mf
                 ON mf.path = tmf.srcpath
             INNER JOIN media.scale ms
                 ON ms.code = tmf.scalecode
-            INNER JOIN media.media_type mt
-                ON mt.name = tmf.typename;
+            INNER JOIN media.type mt
+                ON mt.code = tmf.typename;
 
             """
         );
@@ -115,7 +115,7 @@ class SqlWriter
             SELECT DISTINCT
                 tmf.srcpath
             FROM media.tmpmediafile tmf
-            LEFT OUTER JOIN media.media_file mf
+            LEFT OUTER JOIN media.file mf
                 ON mf.path = tmf.srcpath
             WHERE mf.media_id IS NULL;
 
@@ -242,7 +242,7 @@ class SqlWriter
                 SET metadata = :'media_metadata'::jsonb
                 WHERE id = (
                     SELECT f.media_id
-                    FROM media.media_file f
+                    FROM media.file f
                     INNER JOIN media.scale s
                         ON s.id = f.scale_id
                         AND s.code = 'src'
