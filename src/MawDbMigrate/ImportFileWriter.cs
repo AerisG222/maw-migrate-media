@@ -30,6 +30,8 @@ public class ImportFileWriter
         await WriteSqlScript("comments.sql", async (writer) => await WriteComments(writer, db.Comments));
         await WriteSqlScript("favorites.sql", async (writer) => await WriteFavorites(writer, db.Favorites));
 
+        await WriteSqlScript("refresh-materialized-views.sql", async (writer) => await WriteRefreshMaterializedViews(writer));
+
         await WriteRunnerScript();
     }
 
@@ -457,6 +459,17 @@ public class ImportFileWriter
                 );
                 """);
         }
+    }
+
+    async Task WriteRefreshMaterializedViews(StreamWriter writer)
+    {
+        Console.WriteLine($"- writing materialized view refresh");
+
+        await writer.WriteLineAsync(
+            """
+            REFRESH MATERIALIZED VIEW media.category_search;
+            """
+        );
     }
 
     async Task WriteBeginning(StreamWriter writer)
