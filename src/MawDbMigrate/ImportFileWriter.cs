@@ -5,6 +5,7 @@ namespace MawDbMigrate;
 public class ImportFileWriter
 {
     readonly string _dir;
+    readonly List<string> _sqlScripts = [];
 
     public ImportFileWriter(string outDir)
     {
@@ -54,19 +55,10 @@ public class ImportFileWriter
 
             """);
 
-        await WriteRunScript(writer, "users.sql");
-        await WriteRunScript(writer, "roles.sql");
-        await WriteRunScript(writer, "user-roles.sql");
-
-        await WriteRunScript(writer, "categories.sql");
-        await WriteRunScript(writer, "category-roles.sql");
-        await WriteRunScript(writer, "locations.sql");
-        await WriteRunScript(writer, "points-of-interest.sql");
-        await WriteRunScript(writer, "media.sql");
-        await WriteRunScript(writer, "media-files.sql");
-        await WriteRunScript(writer, "category-media.sql");
-        await WriteRunScript(writer, "comments.sql");
-        await WriteRunScript(writer, "favorites.sql");
+        foreach (var script in _sqlScripts)
+        {
+            await WriteRunScript(writer, script);
+        }
     }
 
     async Task WriteRunScript(StreamWriter writer, string filename)
@@ -98,6 +90,8 @@ public class ImportFileWriter
 
     async Task WriteSqlScript(string filename, Func<StreamWriter, Task> writeAction)
     {
+        _sqlScripts.Add(filename);
+
         var outfile = Path.Combine(_dir, filename);
         using var writer = new StreamWriter(outfile);
 
