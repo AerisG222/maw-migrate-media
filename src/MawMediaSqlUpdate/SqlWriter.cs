@@ -72,6 +72,7 @@ class SqlWriter
             $"""
             INSERT INTO media.file
             (
+                id,
                 media_id,
                 type_id,
                 scale_id,
@@ -81,6 +82,7 @@ class SqlWriter
                 path
             )
             SELECT
+                tmf.id,
                 mf.media_id,
                 mt.id AS type_id,
                 ms.id AS scale_id,
@@ -190,6 +192,7 @@ class SqlWriter
             $"""
             CREATE TABLE IF NOT EXISTS media.tmpmediafile
             (
+                id UUID,
                 srcpath TEXT,
                 typename TEXT,
                 scalecode TEXT,
@@ -275,6 +278,7 @@ class SqlWriter
             $"""
             INSERT INTO media.tmpmediafile
             (
+                id,
                 srcpath,
                 typename,
                 scalecode,
@@ -285,6 +289,7 @@ class SqlWriter
             )
             VALUES
             (
+                '{Guid.CreateVersion7()}',
                 '{srcPath}',
                 '{typeName}',
                 '{file.Scale.Code}',

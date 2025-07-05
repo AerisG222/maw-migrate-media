@@ -57,4 +57,5 @@ output/
 migrate.sql
 _output/
 output-db-migrate
+output-migrate-dry-run
 output-sql-update
