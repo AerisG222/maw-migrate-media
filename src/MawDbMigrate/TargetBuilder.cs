@@ -42,7 +42,7 @@ public class TargetBuilder
 
         PrepareCategories(src.PhotoCategories, src.VideoCategories);
         PrepareCategoryRoles(src.PhotoCategoryRoles, src.VideoCategoryRoles);
-        PrepareMedia(src.Photos, src.PhotoGpsOverrides, src.Videos, src.VideoGpsOverrides);
+        PrepareMedia(src.Photos, src.Videos);
         PrepareMediaFiles(src.Photos, src.Videos);
         PrepareCategoryMedia(src.Photos, src.PhotoCategories, src.Videos, src.VideoCategories);
         PrepareComments(src.PhotoComments, src.VideoComments);
@@ -182,9 +182,7 @@ public class TargetBuilder
 
     void PrepareMedia(
         IEnumerable<Photo> photos,
-        IEnumerable<PhotoGpsOverride> photoGpsOverrides,
-        IEnumerable<Video> videos,
-        IEnumerable<VideoGpsOverride> videoGpsOverrides
+        IEnumerable<Video> videos
     )
     {
         // set media chronologically based on category order
@@ -305,7 +303,7 @@ public class TargetBuilder
     }
 
     bool ShouldAddLocationKeyLookup(string key) => !(string.IsNullOrEmpty(key) || _locationMap.ContainsKey(key));
-    bool IsValidLocationKey(string key) => !string.IsNullOrEmpty(key) && _locationMap.ContainsKey(key);
+
     Models.Target.Location CreateLocation(double latitude, double longitude)
     {
         var location = new Models.Target.Location
@@ -660,7 +658,6 @@ public class TargetBuilder
         {
             var category = videoCategories.Single(x => x.Id == video.CategoryId);
             var media = _videoIdMap[video.Id];
-
 
             var targetCategoryMedia = new Models.Target.CategoryMedia
             {
