@@ -2,6 +2,7 @@ namespace MawDbMigrate.Models.Target;
 
 public class MediaFile
 {
+    public Guid Id { get; set; }
     public Guid MediaId { get; set; }
     public Guid MediaTypeId { get; set; }
     public Guid ScaleId { get; set; }

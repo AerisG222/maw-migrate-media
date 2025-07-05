@@ -56,3 +56,5 @@ nunit-*.xml
 output/
 migrate.sql
 _output/
+output-db-migrate
+output-sql-update

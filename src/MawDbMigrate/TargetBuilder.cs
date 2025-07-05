@@ -591,6 +591,7 @@ public class TargetBuilder
 
             var targetMediaFile = new Models.Target.MediaFile
             {
+                Id = Guid.CreateVersion7(),
                 MediaId = media.Id,
                 MediaTypeId = Models.Target.MediaType.Photo.Id,
                 ScaleId = Models.Target.Scale.Src.Id,
@@ -616,6 +617,7 @@ public class TargetBuilder
 
             var targetMediaFile = new Models.Target.MediaFile
             {
+                Id = Guid.CreateVersion7(),
                 MediaId = media.Id,
                 MediaTypeId = Models.Target.MediaType.Video.Id,
                 ScaleId = Models.Target.Scale.Src.Id,

@@ -277,6 +277,7 @@ public class ImportFileWriter
             await writer.WriteLineAsync(
                 $"""
                 INSERT INTO media.file (
+                    id,
                     media_id,
                     type_id,
                     scale_id,
@@ -285,6 +286,7 @@ public class ImportFileWriter
                     bytes,
                     path
                 ) VALUES (
+                    {SqlAsString(file.Id)},
                     {SqlAsString(file.MediaId)},
                     {SqlAsString(file.MediaTypeId)},
                     {SqlAsString(file.ScaleId)},
