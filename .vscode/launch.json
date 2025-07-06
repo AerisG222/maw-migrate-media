@@ -23,7 +23,7 @@
             "program": "${workspaceFolder}/src/MawMediaMigrate/bin/Debug/net9.0/MawMediaMigrate",
             "args": [
                 "/srv/www/mover-test/website_assets",
-                "/srv/www/mover-test/media",
+                "/srv/www/mover-test/assets",
                 "/srv/www/mover-test"
             ],
             "cwd": "${workspaceFolder}/src/MawMediaMigrate",
@@ -38,7 +38,7 @@
             "program": "${workspaceFolder}/src/MawMediaSqlUpdate/bin/Debug/net9.0/MawMediaSqlUpdate",
             "args": [
                 "/data/www/website_assets",
-                "/data/www/media",
+                "/data/maw-media-assets",
                 "/home/mmorano/git/maw-migrate-media/output/dryrun",
                 "/home/mmorano/git/maw-migrate-media/output/dryrun"
             ],

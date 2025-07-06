@@ -28,9 +28,9 @@ class Options
             Environment.Exit(2);
         }
 
-        if (destDir.Exists || !destDir.Name.Equals("media", StringComparison.OrdinalIgnoreCase))
+        if (destDir.Exists || !destDir.Name.Equals("maw-media-assets", StringComparison.OrdinalIgnoreCase))
         {
-            Console.WriteLine("Destination exists or is not named 'media' as expected.");
+            Console.WriteLine("Destination exists or is not named 'maw-media-assets' as expected.");
             Environment.Exit(3);
         }
 

@@ -16,8 +16,8 @@ echo "-- MIGRATE MEDIA --"
 cd src/MawMediaMigrate
 
 dotnet run \
-    /data/www/website_assets/ \
-    /data/www/media \
+    /data/www/website_assets \
+    /data/maw-media-assets \
     "${ROOTDIR}/output-migrate-dry-run/" \
     --dry-run
 
@@ -28,8 +28,8 @@ echo "-- SQL UPDATE --"
 cd src/MawMediaSqlUpdate
 
 dotnet run \
-    /data/www/website_assets/ \
-    /data/www/media \
+    /data/www/website_assets \
+    /data/maw-media-assets \
     "${ROOTDIR}/output-migrate-dry-run/" \
     "${ROOTDIR}/output-sql-update/"
 

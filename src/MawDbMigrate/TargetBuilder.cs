@@ -593,7 +593,7 @@ public class TargetBuilder
                 FixupMediaDirectory(Path.GetDirectoryName(photo.SrcPath!)!),
                 Path.GetFileName(photo.SrcPath!)
             )
-            .Replace("/images/", "/media/");
+            .Replace("/images/", "/assets/");
 
             var targetMediaFile = new Models.Target.MediaFile
             {
@@ -619,7 +619,7 @@ public class TargetBuilder
                 Path.GetFileName(video.RawPath!)
             )
             .Replace("/raw/", "/src/")
-            .Replace("/movies/", "/media/");
+            .Replace("/movies/", "/assets/");
 
             var targetMediaFile = new Models.Target.MediaFile
             {

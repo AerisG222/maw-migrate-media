@@ -44,8 +44,8 @@ class Options
     static void ShowUsage()
     {
         Console.WriteLine("Usage: MawMediaSqlUpdate <orig-media-dir> <dest-media-dir> <json-results-dir> <sql-output-dir>");
-        Console.WriteLine("  <orig-media-dir>   - Root Directory where photos / videos in the legacy directory structure. (i.e. /data/www/website_assets).");
-        Console.WriteLine("  <dest-media-dir>   - Root Directory for the new media (i.e. /data/www/media).");
+        Console.WriteLine("  <orig-asset-dir>   - Root Directory where photos / videos in the legacy directory structure. (i.e. /data/www/website_assets).");
+        Console.WriteLine("  <dest-asset-dir>   - Root Directory for the new media (i.e. /data/maw-media-assets).");
         Console.WriteLine("  <json-results-dir> - Directory containing json result files from MawMediaMigrate.");
         Console.WriteLine("  <sql-output-dir>   - Directory where sql update scripts should be written.");
     }

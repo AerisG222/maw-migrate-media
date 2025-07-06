@@ -266,8 +266,8 @@ class SqlWriter
 
     async Task WriteScaleUpdate(StreamWriter writer, MediaInfo mi, ScaledFile file)
     {
-        var srcPath = mi.DestinationSrcPath.Replace(_destMediaDir.Parent!.FullName, string.Empty);
-        var scalePath = file.Path.Replace(_destMediaDir.Parent!.FullName, string.Empty);
+        var srcPath = mi.DestinationSrcPath.Replace(_destMediaDir.FullName, "/assets");
+        var scalePath = file.Path.Replace(_destMediaDir.FullName, "/assets");
         var typeName = file.Scale.IsPoster
             ? "video-poster"
             : string.Equals(Path.GetExtension(file.Path), ".avif", StringComparison.OrdinalIgnoreCase)
