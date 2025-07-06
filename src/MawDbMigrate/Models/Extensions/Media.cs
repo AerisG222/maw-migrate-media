@@ -15,7 +15,7 @@ public static class MediaExtensions
             MediaTypeId = MediaType.Photo.Id,
             LocationId = null,
             LocationOverrideId = null,
-            Created = photo.CreateDate,
+            Created = photo.CreateDate ?? DateTime.MinValue,
             CreatedBy = adminId,
             Modified = DateTime.MinValue,
             ModifiedBy = adminId,

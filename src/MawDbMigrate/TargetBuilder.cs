@@ -230,17 +230,21 @@ public class TargetBuilder
     {
         foreach (var comment in photoComments)
         {
-            var targetComment = new Models.Target.Comment
+            // we may have thrown away the google demo photo instances - so ignore if missing
+            if (_photoIdMap.TryGetValue(comment.PhotoId, out var media))
             {
-                Id = Guid.CreateVersion7(),
-                MediaId = _photoIdMap[comment.PhotoId].Id,
-                Created = comment.EntryDate,
-                CreatedBy = _userIdMap[comment.UserId],
-                Modified = DateTime.MinValue,
-                Body = comment.Message
-            };
+                var targetComment = new Models.Target.Comment
+                {
+                    Id = Guid.CreateVersion7(),
+                    MediaId = _photoIdMap[media.LegacyId].Id,
+                    Created = comment.EntryDate,
+                    CreatedBy = _userIdMap[comment.UserId],
+                    Modified = DateTime.MinValue,
+                    Body = comment.Message
+                };
 
-            _target.Comments.Add(targetComment);
+                _target.Comments.Add(targetComment);
+            }
         }
 
         foreach (var comment in videoComments)
@@ -266,14 +270,18 @@ public class TargetBuilder
     {
         foreach (var rating in photoRatings)
         {
-            var targetFavorite = new Models.Target.Favorite
+            // we may have thrown away the google demo photo instances - so ignore if missing
+            if (_photoIdMap.TryGetValue(rating.PhotoId, out var media))
             {
-                MediaId = _photoIdMap[rating.PhotoId].Id,
-                CreatedBy = _userIdMap[rating.UserId],
-                Created = DateTime.MinValue
-            };
+                var targetFavorite = new Models.Target.Favorite
+                {
+                    MediaId = _photoIdMap[media.LegacyId].Id,
+                    CreatedBy = _userIdMap[rating.UserId],
+                    Created = DateTime.MinValue
+                };
 
-            _target.Favorites.Add(targetFavorite);
+                _target.Favorites.Add(targetFavorite);
+            }
         }
 
         foreach (var rating in videoRatings)
@@ -595,7 +603,7 @@ public class TargetBuilder
                 ScaleId = Models.Target.Scale.Src.Id,
                 Width = photo.SrcWidth,
                 Height = photo.SrcHeight,
-                Bytes = photo.SrcSize,
+                Bytes = photo.SrcSize ?? 0,
                 Path = srcPath
             };
 
