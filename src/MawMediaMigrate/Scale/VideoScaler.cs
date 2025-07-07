@@ -61,10 +61,12 @@ class VideoScaler
 
     // https://trac.ffmpeg.org/wiki/Encode/AV1#SVT-AV1
     // https://www.ffmpeg.org/ffmpeg-all.html#scale-1
+    // https://evilmartians.com/chronicles/better-web-video-with-av1-codec
     static string GetFfmpegArgs(string src, string dst, ScaleSpec scale)
     {
         List<string> args = [
-            "-i", $"\"{src}\""
+            "-i", $"\"{src}\"",
+            "-map_metadata", "-1"
         ];
 
         if (scale.IsCropToFill)
