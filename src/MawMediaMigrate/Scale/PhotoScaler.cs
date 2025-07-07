@@ -86,6 +86,7 @@ class PhotoScaler
         args.AddRange([
             "-colorspace", "sRGB",
             "-quality", "72",
+            "-strip",
             $"\"{dst}\""
         ]);
 
