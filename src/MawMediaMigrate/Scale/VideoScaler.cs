@@ -69,24 +69,34 @@ class VideoScaler
             "-map_metadata", "-1"
         ];
 
-        if (scale.IsCropToFill)
+        if (scale.Width != int.MaxValue)
         {
-            // scale video to fit area (full height or width, with borders as necessary)
-            //"-vf", $"\"scale={scale.Width}:{scale.Height}:force_original_aspect_ratio=decrease,pad={scale.Width}:{scale.Height}:(ow-iw)/2:(oh-ih)/2\"",
+            if (scale.IsCropToFill)
+            {
+                // scale video to fit area (full height or width, with borders as necessary)
+                //"-vf", $"\"scale={scale.Width}:{scale.Height}:force_original_aspect_ratio=decrease,pad={scale.Width}:{scale.Height}:(ow-iw)/2:(oh-ih)/2\"",
 
-            // scale video to fit area (cropped to fit), drop sound, 24fps
-            args.AddRange([
-                "-an",
-                "-vf", $"\"scale=(iw*sar)*max({scale.Width}/(iw*sar)\\,{scale.Height}/ih):ih*max({scale.Width}/(iw*sar)\\,{scale.Height}/ih), crop={scale.Width}:{scale.Height}\"",
-                "-r", "24"
-            ]);
+                // scale video to fit area (cropped to fit), drop sound, 24fps
+                args.AddRange([
+                    "-an",
+                    "-vf", $"\"scale=(iw*sar)*max({scale.Width}/(iw*sar)\\,{scale.Height}/ih):ih*max({scale.Width}/(iw*sar)\\,{scale.Height}/ih), crop={scale.Width}:{scale.Height}\"",
+                    "-r", "24"
+                ]);
+            }
+            else
+            {
+                args.AddRange([
+                    "-c:a", "aac",
+                    "-b:a", "128k",
+                    "-vf", $"\"scale='min({scale.Width},iw)':'min({scale.Height},ih)':force_original_aspect_ratio=decrease:force_divisible_by=2\""
+                ]);
+            }
         }
         else
         {
             args.AddRange([
                 "-c:a", "aac",
                 "-b:a", "128k",
-                "-vf", $"\"scale='min({scale.Width},iw)':'min({scale.Height},ih)':force_original_aspect_ratio=decrease:force_divisible_by=2\""
             ]);
         }
 

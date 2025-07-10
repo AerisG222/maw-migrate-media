@@ -23,7 +23,9 @@ public record class ScaleSpec(
         new ("qhd",             2560, 1440, false, false),
         new ("qhd",             2560, 1440, false, true),
         new ("4k",              3840, 2160, false, false),
-        new ("4k",              3840, 2160, false, true)
+        new ("4k",              3840, 2160, false, true),
+        new ("full",            int.MaxValue, int.MaxValue, false, false),
+        new ("full",            int.MaxValue, int.MaxValue, false, true)
     ];
 
     public static ScaleSpec[] AllScales => _allScales;
