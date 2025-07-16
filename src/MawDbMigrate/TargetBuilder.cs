@@ -298,8 +298,8 @@ public class TargetBuilder
     }
 
     string BuildLocationKey(
-        double? latitude,
-        double? longitude
+        decimal? latitude,
+        decimal? longitude
     )
     {
         if (latitude == null || longitude == null)
@@ -312,7 +312,7 @@ public class TargetBuilder
 
     bool ShouldAddLocationKeyLookup(string key) => !(string.IsNullOrEmpty(key) || _locationMap.ContainsKey(key));
 
-    Models.Target.Location CreateLocation(double latitude, double longitude)
+    Models.Target.Location CreateLocation(decimal latitude, decimal longitude)
     {
         var location = new Models.Target.Location
         {
