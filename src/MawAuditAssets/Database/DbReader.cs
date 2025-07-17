@@ -39,8 +39,7 @@ public class DbReader
             .Where(x => x != null)
             .Cast<string>();
 
-        return photoPaths
-            .Concat(videoPaths);
+        return photoPaths.Concat(videoPaths);
     }
 
     async Task<IEnumerable<T>> LoadTable<T>(string tableName, NpgsqlConnection conn)
