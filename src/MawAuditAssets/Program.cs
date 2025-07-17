@@ -26,6 +26,11 @@ var filesFromDb =
 var filesFromFilesystem = Directory
     .EnumerateFiles(assetRootDir, "*", SearchOption.AllDirectories)
     .Where(f => !string.Equals(".dng", Path.GetExtension(f), StringComparison.OrdinalIgnoreCase))
+    .Where(f => !string.Equals(".sql", Path.GetExtension(f), StringComparison.OrdinalIgnoreCase))
+    .Where(f => !string.Equals(".pp3", Path.GetExtension(f), StringComparison.OrdinalIgnoreCase))
+    .Where(f => !f.EndsWith("pp3s.tar.gz"))
+    .Where(f => f.IndexOf("/2k/") < 0)
+    .Where(f => f.IndexOf("/4k/") < 0)
     .ToImmutableSortedSet(StringComparer.Ordinal);
 
 Console.WriteLine($"db files: {filesFromDb.Count}");
