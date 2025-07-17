@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MawMediaMigrate.Results", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MawMediaSqlUpdate", "src\MawMediaSqlUpdate\MawMediaSqlUpdate.csproj", "{3CAB27C2-AE04-4D90-8DB5-BA93A17EBE73}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MawAuditAssets", "src\MawAuditAssets\MawAuditAssets.csproj", "{96D6F06E-29B5-4F62-B7C7-AE1893B8D548}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -34,6 +36,10 @@ Global
 		{3CAB27C2-AE04-4D90-8DB5-BA93A17EBE73}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3CAB27C2-AE04-4D90-8DB5-BA93A17EBE73}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3CAB27C2-AE04-4D90-8DB5-BA93A17EBE73}.Release|Any CPU.Build.0 = Release|Any CPU
+		{96D6F06E-29B5-4F62-B7C7-AE1893B8D548}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{96D6F06E-29B5-4F62-B7C7-AE1893B8D548}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{96D6F06E-29B5-4F62-B7C7-AE1893B8D548}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{96D6F06E-29B5-4F62-B7C7-AE1893B8D548}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -43,6 +49,7 @@ Global
 		{1FADD968-BA8F-490F-9152-333B091CB686} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{5A24B702-4EB9-40E7-A707-F36CEEA6A4C1} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{3CAB27C2-AE04-4D90-8DB5-BA93A17EBE73} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{96D6F06E-29B5-4F62-B7C7-AE1893B8D548} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {382A6546-0E6E-4417-957B-FE56D6661D04}
