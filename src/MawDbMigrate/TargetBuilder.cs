@@ -311,6 +311,7 @@ public class TargetBuilder
     }
 
     bool ShouldAddLocationKeyLookup(string key) => !(string.IsNullOrEmpty(key) || _locationMap.ContainsKey(key));
+    bool IsValidLocationKey(string key) => _locationMap.ContainsKey(key);
 
     Models.Target.Location CreateLocation(decimal latitude, decimal longitude)
     {
@@ -383,6 +384,54 @@ public class TargetBuilder
         IEnumerable<VideoGpsOverride> videoGpsOverrides
     )
     {
+        foreach (var photo in photos)
+        {
+            var key = BuildLocationKey(photo.GpsLatitude, photo.GpsLongitude);
+
+            if (IsValidLocationKey(key))
+            {
+                var targetMedia = _photoIdMap[photo.Id];
+
+                targetMedia.LocationId = _locationMap[key].Id;
+            }
+        }
+
+        foreach (var video in videos)
+        {
+            var key = BuildLocationKey(video.GpsLatitude, video.GpsLongitude);
+
+            if (IsValidLocationKey(key))
+            {
+                var targetMedia = _videoIdMap[video.Id];
+
+                targetMedia.LocationId = _locationMap[key].Id;
+            }
+        }
+
+        foreach (var photo in photoGpsOverrides)
+        {
+            var key = BuildLocationKey(photo.Latitude, photo.Longitude);
+
+            if (IsValidLocationKey(key))
+            {
+                var targetMedia = _photoIdMap[photo.PhotoId];
+
+                targetMedia.LocationId = _locationMap[key].Id;
+            }
+        }
+
+        foreach (var video in videoGpsOverrides)
+        {
+            var key = BuildLocationKey(video.Latitude, video.Longitude);
+
+            if (IsValidLocationKey(key))
+            {
+                var targetMedia = _videoIdMap[video.VideoId];
+
+                targetMedia.LocationId = _locationMap[key].Id;
+            }
+        }
+
         foreach (var reverseGeocode in photoReverseGeocodes)
         {
             var targetMedia = _photoIdMap[reverseGeocode.PhotoId];
@@ -485,7 +534,7 @@ public class TargetBuilder
 
         foreach (var poi in videoPointsOfInterest)
         {
-            var targetMedia = _photoIdMap[poi.VideoId];
+            var targetMedia = _videoIdMap[poi.VideoId];
 
             if (poi.IsOverride)
             {
