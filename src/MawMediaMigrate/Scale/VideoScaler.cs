@@ -18,7 +18,7 @@ class VideoScaler
         var (srcWidth, srcHeight) = await _inspector.QueryDimensions(src.FullName);
         var scales = GetScalesForDimensions(srcWidth, srcHeight, true);
 
-        await Parallel.ForEachAsync(scales, async (scale, token) =>
+        foreach(var scale in scales)
         {
             var dst = new FileInfo(
                 Path.Combine(
@@ -46,7 +46,7 @@ class VideoScaler
             };
 
             process.Start();
-            await process.WaitForExitAsync(token);
+            await process.WaitForExitAsync();
 
             var (scaledWidth, scaledHeight) = await _inspector.QueryDimensions(dst.FullName);
 
@@ -54,7 +54,7 @@ class VideoScaler
             {
                 results.Add(new ScaledFile(scale, dst.FullName, scaledWidth, scaledHeight, dst.Length));
             }
-        });
+        };
 
         return new ScaleResult(src.FullName, results);
     }
