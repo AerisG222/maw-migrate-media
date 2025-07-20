@@ -46,6 +46,7 @@ class VideoScaler
                 // try to cleanup and rescale.  if this still fails, something funny is going on so log the file
                 try
                 {
+                    Console.WriteLine($"cleaning up: {dst.FullName}");
                     File.Delete(dst.FullName);
                 }
                 catch
@@ -66,6 +67,7 @@ class VideoScaler
                 }
             }
 
+            dst.Refresh();
             results.Add(new ScaledFile(scale, dst.FullName, scaledDims.ImageWidth, scaledDims.ImageHeight, dst.Length));
         };
 
