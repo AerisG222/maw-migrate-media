@@ -28,10 +28,15 @@ class Options
             Environment.Exit(2);
         }
 
-        if (destDir.Exists || !destDir.Name.Equals("maw-media-assets", StringComparison.OrdinalIgnoreCase))
+        if (!destDir.Name.Equals("maw-media-assets", StringComparison.OrdinalIgnoreCase))
         {
-            Console.WriteLine("Destination exists or is not named 'maw-media-assets' as expected.");
+            Console.WriteLine("Destination must be named 'maw-media-assets'");
             Environment.Exit(3);
+        }
+
+        if (destDir.Exists)
+        {
+            Console.WriteLine("** Destination exists - process will scan for unprocessed files and resume where it left off.");
         }
 
         if (!outDir.Exists)
