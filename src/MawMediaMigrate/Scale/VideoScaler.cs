@@ -14,6 +14,8 @@ class VideoScaler
 
     public override async Task<ScaleResult> Scale(FileInfo src, DirectoryInfo origMediaRoot)
     {
+        int scaledWidth;
+        int scaledHeight;
         var results = new List<ScaledFile>();
         var (srcWidth, srcHeight) = await _inspector.QueryDimensions(src.FullName);
         var scales = GetScalesForDimensions(srcWidth, srcHeight, true);
@@ -29,35 +31,68 @@ class VideoScaler
             );
 
             // no need to rerun if it already exists - allows for resuming job
-            if (dst.Exists)
+            if (!dst.Exists)
             {
-                CreateDir(dst.DirectoryName!);
-
-                var psi = new ProcessStartInfo
-                {
-                    FileName = "ffmpeg",
-                    Arguments = GetFfmpegArgs(src.FullName, dst.FullName, scale),
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                };
-
-                using var process = new Process
-                {
-                    StartInfo = psi
-                };
-
-                process.Start();
-                await process.WaitForExitAsync();
+                await ScaleVideo(src, dst, scale);
             }
 
-            var (scaledWidth, scaledHeight) = await _inspector.QueryDimensions(dst.FullName);
+            try
+            {
+                (scaledWidth, scaledHeight) = await _inspector.QueryDimensions(dst.FullName);
+            }
+            catch
+            {
+                // when reprocessing, sometimes corrupt or zero length files were created, so if this is the case,
+                // try to cleanup and rescale.  if this still fails, something funny is going on so log the file
+                try
+                {
+                    File.Delete(dst.FullName);
+                }
+                catch
+                {
+                    // swallow
+                }
+
+                await ScaleVideo(src, dst, scale);
+
+                try
+                {
+                    (scaledWidth, scaledHeight) = await _inspector.QueryDimensions(dst.FullName);
+                }
+                catch
+                {
+                    Console.WriteLine($"  ** Unable to process {src.FullName}");
+                    continue;
+                }
+            }
 
             results.Add(new ScaledFile(scale, dst.FullName, scaledWidth, scaledHeight, dst.Length));
         };
 
         return new ScaleResult(src.FullName, results);
+    }
+
+    static async Task ScaleVideo(FileInfo src, FileInfo dst, ScaleSpec scale)
+    {
+        CreateDir(dst.DirectoryName!);
+
+        var psi = new ProcessStartInfo
+        {
+            FileName = "ffmpeg",
+            Arguments = GetFfmpegArgs(src.FullName, dst.FullName, scale),
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
+
+        using var process = new Process
+        {
+            StartInfo = psi
+        };
+
+        process.Start();
+        await process.WaitForExitAsync();
     }
 
     // https://trac.ffmpeg.org/wiki/Encode/AV1#SVT-AV1
