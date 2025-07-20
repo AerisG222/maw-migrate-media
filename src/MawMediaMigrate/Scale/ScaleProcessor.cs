@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using MawMediaMigrate.Results;
 
 namespace MawMediaMigrate.Scale;
@@ -8,6 +9,7 @@ class ScaleProcessor
     readonly DirectoryInfo _origDir;
     readonly IScaler _imageScaler;
     readonly IScaler _videoScaler;
+    readonly HashSet<string> _seenDirs = [];
 
     public ScaleProcessor(Options options)
     {
@@ -55,6 +57,8 @@ class ScaleProcessor
                 return;
             }
 
+            ReportStatus(file);
+
             var scaleResult = await scaler.Scale(file, origMediaRoot);
 
             lock (_lockObj)
@@ -64,5 +68,20 @@ class ScaleProcessor
         });
 
         return result;
+    }
+
+    void ReportStatus(FileInfo file)
+    {
+        var dirToReport = file.Directory!.Parent!.FullName;
+
+        lock (_lockObj)
+        {
+            if (!_seenDirs.Contains(dirToReport))
+            {
+                _seenDirs.Add(dirToReport);
+
+                Console.WriteLine($"  - {dirToReport}");
+            }
+        }
     }
 }
