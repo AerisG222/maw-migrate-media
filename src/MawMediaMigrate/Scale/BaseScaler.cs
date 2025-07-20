@@ -5,7 +5,6 @@ namespace MawMediaMigrate.Scale;
 abstract class BaseScaler
     : IScaler
 {
-    protected readonly Lock _lockObj = new();
     protected readonly IInspector _inspector;
     protected readonly DirectoryInfo _origRootDir;
     protected readonly DirectoryInfo _destRootDir;

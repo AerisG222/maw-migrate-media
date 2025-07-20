@@ -27,12 +27,8 @@ class DryRunVideoScaler
                 )
             );
 
-            lock (_lockObj)
-            {
-                results.Add(new ScaledFile(scale, dst.FullName, 100, 200, 300));
-            }
+            results.Add(new ScaledFile(scale, dst.FullName, 100, 200, 300));
         }
-        ;
 
         return new ScaleResult(src.FullName, results);
     }

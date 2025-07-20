@@ -28,32 +28,33 @@ class PhotoScaler
                 )
             );
 
-            CreateDir(dst.DirectoryName!);
-
-            var psi = new ProcessStartInfo
+            // no need to rescale if it already exists - allows for resuming job
+            if (!dst.Exists)
             {
-                FileName = "magick",
-                Arguments = GetImageMagickArgs(src.FullName, dst.FullName, scale),
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
+                CreateDir(dst.DirectoryName!);
 
-            using var process = new Process
-            {
-                StartInfo = psi
-            };
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "magick",
+                    Arguments = GetImageMagickArgs(src.FullName, dst.FullName, scale),
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
 
-            process.Start();
-            await process.WaitForExitAsync();
+                using var process = new Process
+                {
+                    StartInfo = psi
+                };
+
+                process.Start();
+                await process.WaitForExitAsync();
+            }
 
             var (scaledWidth, scaledHeight) = await _inspector.QueryDimensions(dst.FullName);
 
-            lock (_lockObj)
-            {
-                results.Add(new ScaledFile(scale, dst.FullName, scaledWidth, scaledHeight, dst.Length));
-            }
+            results.Add(new ScaledFile(scale, dst.FullName, scaledWidth, scaledHeight, dst.Length));
         }
 
         return new ScaleResult(src.FullName, results);
