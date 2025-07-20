@@ -70,7 +70,7 @@ class ScaleProcessor
         Dictionary<string, string> filesToSkip
     )
     {
-        var result = new List<ScaleResult>();
+        var results = new List<ScaleResult>();
         var origMediaRoot = new DirectoryInfo(Path.Combine(_origDir.FullName, mediaDirRootName));
         var files = origMediaRoot.EnumerateFiles("*", SearchOption.AllDirectories);
 
@@ -92,18 +92,18 @@ class ScaleProcessor
 
             lock (_lockObj)
             {
-                result.Add(scaleResult);
+                results.Add(scaleResult);
 
-                if (result.Count() % SAVEPOINT_COUNT == 0)
+                if (results.Count() % SAVEPOINT_COUNT == 0)
                 {
-                    WriteSavePoint(result);
-                    result.Clear();
+                    WriteSavePoint(results);
+                    results.Clear();
                 }
             }
         });
 
-        WriteSavePoint(result);
-        result.Clear();
+        WriteSavePoint(results);
+        results.Clear();
 
         return ReadAllSavePoints();
     }
