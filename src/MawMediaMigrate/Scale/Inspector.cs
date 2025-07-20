@@ -11,7 +11,7 @@ class Inspector
 
     public async Task BulkLoadSourceDimensions(string rootPath)
     {
-        var result = await Cli
+        using var cmd = Cli
             .Wrap("exiftool")
             .WithArguments([
                 "-j",
@@ -32,6 +32,8 @@ class Inspector
                 rootPath
             ])
             .ExecuteBufferedAsync();
+
+        var result = await cmd;
 
         if (string.IsNullOrWhiteSpace(result.StandardOutput))
         {
@@ -58,7 +60,7 @@ class Inspector
             return res;
         }
 
-        var process = await Cli
+        using var cmd = Cli
             .Wrap("exiftool")
             .WithArguments([
                 "-j",
@@ -67,6 +69,8 @@ class Inspector
                 path
             ])
             .ExecuteBufferedAsync();
+
+        var process = await cmd;
 
         return JsonSerializer.Deserialize<InspectResult[]>(process.StandardOutput)!.First();
     }

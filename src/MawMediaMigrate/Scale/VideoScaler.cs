@@ -1,5 +1,4 @@
 using CliWrap;
-using CliWrap.Buffered;
 using MawMediaMigrate.Results;
 
 namespace MawMediaMigrate.Scale;
@@ -78,10 +77,12 @@ class VideoScaler
     {
         CreateDir(dst.DirectoryName!);
 
-        await Cli
+        using var cmd = Cli
             .Wrap("ffmpeg")
             .WithArguments(GetFfmpegArgs(src.FullName, dst.FullName, scale))
-            .ExecuteBufferedAsync();
+            .ExecuteAsync();
+
+        await cmd;
     }
 
     // https://trac.ffmpeg.org/wiki/Encode/AV1#SVT-AV1

@@ -1,5 +1,4 @@
 using CliWrap;
-using CliWrap.Buffered;
 using MawMediaMigrate.Results;
 
 namespace MawMediaMigrate.Scale;
@@ -77,10 +76,12 @@ class PhotoScaler
     {
         CreateDir(dst.DirectoryName!);
 
-        await Cli
+        using var cmd = Cli
             .Wrap("magick")
             .WithArguments(GetImageMagickArgs(src.FullName, dst.FullName, scale))
-            .ExecuteBufferedAsync();
+            .ExecuteAsync();
+
+        await cmd;
     }
 
     // https://usage.imagemagick.org/resize/

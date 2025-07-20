@@ -1,6 +1,5 @@
 using System.Text.Json;
 using CliWrap;
-using CliWrap.Buffered;
 using MawMediaMigrate.Results;
 
 namespace MawMediaMigrate.Exif;
@@ -36,7 +35,7 @@ class ExifExporter
 
     async Task ExportExifAsJson(FileInfo file)
     {
-        await Cli
+        using var cmd = Cli
             .Wrap("exiftool")
             .WithArguments([
                 "-json",
@@ -47,7 +46,9 @@ class ExifExporter
                 "%d%f.%e.json",
                 file.FullName
             ])
-            .ExecuteBufferedAsync();
+            .ExecuteAsync();
+
+        await cmd;
     }
 
     async Task FormatJson(FileInfo outfile)
