@@ -1,3 +1,5 @@
+namespace MawMediaMigrate.Scale;
+
 class DryRunInspector
     : IInspector
 {
@@ -6,8 +8,8 @@ class DryRunInspector
         return Task.CompletedTask;
     }
 
-    public Task<(int width, int height)> QueryDimensions(string path)
+    public Task<InspectResult> QueryDimensions(string path)
     {
-        return Task.FromResult((1920, 1080));
+        return Task.FromResult(new InspectResult(path, 1920, 1080));
     }
 }

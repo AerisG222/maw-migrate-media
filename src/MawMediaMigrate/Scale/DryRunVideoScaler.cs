@@ -14,8 +14,8 @@ class DryRunVideoScaler
     public override async Task<ScaleResult> Scale(FileInfo src, DirectoryInfo origMediaRoot)
     {
         var results = new List<ScaledFile>();
-        var (srcWidth, srcHeight) = await _inspector.QueryDimensions(src.FullName);
-        var scales = GetScalesForDimensions(srcWidth, srcHeight, true);
+        var srcDims = await _inspector.QueryDimensions(src.FullName);
+        var scales = GetScalesForDimensions(srcDims.ImageWidth, srcDims.ImageHeight, true);
 
         foreach (var scale in scales)
         {

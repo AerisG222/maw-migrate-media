@@ -14,8 +14,8 @@ class DryRunPhotoScaler
     public override async Task<ScaleResult> Scale(FileInfo src, DirectoryInfo origMediaRoot)
     {
         var results = new List<ScaledFile>();
-        var (srcWidth, srcHeight) = await _inspector.QueryDimensions(src.FullName);
-        var scales = GetScalesForDimensions(srcWidth, srcHeight, false);
+        var srcDims = await _inspector.QueryDimensions(src.FullName);
+        var scales = GetScalesForDimensions(srcDims.ImageWidth, srcDims.ImageHeight, false);
 
         foreach (var scale in scales)
         {

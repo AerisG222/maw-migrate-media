@@ -51,11 +51,11 @@ class Inspector
         }
     }
 
-    public async Task<(int width, int height)> QueryDimensions(string path)
+    public async Task<InspectResult> QueryDimensions(string path)
     {
         if (_sourceInspectionResults.TryGetValue(path, out InspectResult? res))
         {
-            return (res.ImageWidth, res.ImageHeight);
+            return res;
         }
 
         var psi = new ProcessStartInfo
@@ -87,10 +87,6 @@ class Inspector
             throw new InvalidDataException("Expected to get json from exiftool!");
         }
 
-        var json = JsonDocument.Parse(data);
-        var width = json.RootElement[0].GetProperty("ImageWidth").GetInt32();
-        var height = json.RootElement[0].GetProperty("ImageHeight").GetInt32();
-
-        return (width, height);
+        return JsonSerializer.Deserialize<InspectResult[]>(data)!.First();
     }
 }

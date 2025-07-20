@@ -1,4 +1,5 @@
 using MawMediaMigrate.Results;
+using MawMediaMigrate.Scale;
 
 namespace MawMediaMigrate.Move;
 
@@ -23,14 +24,14 @@ class Mover
 
         File.Move(src.FullName, dst.FullName);
 
-        var (width, height) = await _inspector.QueryDimensions(dst.FullName);
+        var dims = await _inspector.QueryDimensions(dst.FullName);
 
         return new MoveResult
         {
             Src = src.FullName,
             Dst = dst.FullName,
-            Width = width,
-            Height = height,
+            Width = dims.ImageWidth,
+            Height = dims.ImageHeight,
             Bytes = dst.Length
         };
     }

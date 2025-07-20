@@ -14,11 +14,10 @@ class VideoScaler
 
     public override async Task<ScaleResult> Scale(FileInfo src, DirectoryInfo origMediaRoot)
     {
-        int scaledWidth;
-        int scaledHeight;
+        InspectResult scaledDims;
         var results = new List<ScaledFile>();
-        var (srcWidth, srcHeight) = await _inspector.QueryDimensions(src.FullName);
-        var scales = GetScalesForDimensions(srcWidth, srcHeight, true);
+        var srcDims = await _inspector.QueryDimensions(src.FullName);
+        var scales = GetScalesForDimensions(srcDims.ImageWidth, srcDims.ImageHeight, true);
 
         foreach(var scale in scales)
         {
@@ -38,7 +37,7 @@ class VideoScaler
 
             try
             {
-                (scaledWidth, scaledHeight) = await _inspector.QueryDimensions(dst.FullName);
+                scaledDims = await _inspector.QueryDimensions(dst.FullName);
             }
             catch
             {
@@ -57,7 +56,7 @@ class VideoScaler
 
                 try
                 {
-                    (scaledWidth, scaledHeight) = await _inspector.QueryDimensions(dst.FullName);
+                    scaledDims = await _inspector.QueryDimensions(dst.FullName);
                 }
                 catch
                 {
@@ -66,7 +65,7 @@ class VideoScaler
                 }
             }
 
-            results.Add(new ScaledFile(scale, dst.FullName, scaledWidth, scaledHeight, dst.Length));
+            results.Add(new ScaledFile(scale, dst.FullName, scaledDims.ImageWidth, scaledDims.ImageHeight, dst.Length));
         };
 
         return new ScaleResult(src.FullName, results);
