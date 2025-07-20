@@ -94,7 +94,7 @@ class ScaleProcessor
             {
                 results.Add(scaleResult);
 
-                if (results.Count() % SAVEPOINT_COUNT == 0)
+                if (results.Count % SAVEPOINT_COUNT == 0)
                 {
                     WriteSavePoint(results);
                     results.Clear();
