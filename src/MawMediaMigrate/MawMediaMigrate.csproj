@@ -12,4 +12,8 @@
         <ProjectReference Include="..\MawMediaMigrate.Results\MawMediaMigrate.Results.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <PackageReference Include="CliWrap" Version="3.9.0" />
+    </ItemGroup>
+
 </Project>

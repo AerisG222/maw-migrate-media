@@ -7,6 +7,7 @@ class ScaleProcessor
 {
     readonly Lock _lockObj = new();
     readonly DirectoryInfo _origDir;
+    readonly IInspector _inspector;
     readonly IScaler _imageScaler;
     readonly IScaler _videoScaler;
     readonly HashSet<string> _seenDirs = [];
@@ -14,6 +15,8 @@ class ScaleProcessor
     public ScaleProcessor(Options options)
     {
         ArgumentNullException.ThrowIfNull(options);
+
+        _inspector = options.Inspector;
 
         _imageScaler = options.DryRun
             ? new DryRunPhotoScaler(options.Inspector, options.OrigDir, options.DestDir)
@@ -28,6 +31,10 @@ class ScaleProcessor
 
     public async Task<IEnumerable<ScaleResult>> ScaleFiles()
     {
+        await _inspector.BulkLoadSourceDimensions(_origDir.FullName);
+
+        Console.WriteLine($"  - Completed bulk load dimensions");
+
         var imageResults = await ScaleImages();
         var videoResults = await ScaleVideos();
 
