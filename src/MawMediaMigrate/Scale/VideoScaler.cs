@@ -1,4 +1,5 @@
-using System.Diagnostics;
+using CliWrap;
+using CliWrap.Buffered;
 using MawMediaMigrate.Results;
 
 namespace MawMediaMigrate.Scale;
@@ -75,32 +76,19 @@ class VideoScaler
     {
         CreateDir(dst.DirectoryName!);
 
-        var psi = new ProcessStartInfo
-        {
-            FileName = "ffmpeg",
-            Arguments = GetFfmpegArgs(src.FullName, dst.FullName, scale),
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
-            CreateNoWindow = true
-        };
-
-        using var process = new Process
-        {
-            StartInfo = psi
-        };
-
-        process.Start();
-        await process.WaitForExitAsync();
+        await Cli
+            .Wrap("ffmpeg")
+            .WithArguments(GetFfmpegArgs(src.FullName, dst.FullName, scale))
+            .ExecuteBufferedAsync();
     }
 
     // https://trac.ffmpeg.org/wiki/Encode/AV1#SVT-AV1
     // https://www.ffmpeg.org/ffmpeg-all.html#scale-1
     // https://evilmartians.com/chronicles/better-web-video-with-av1-codec
-    static string GetFfmpegArgs(string src, string dst, ScaleSpec scale)
+    static IEnumerable<string> GetFfmpegArgs(string src, string dst, ScaleSpec scale)
     {
         List<string> args = [
-            "-i", $"\"{src}\"",
+            "-i", src,
             "-map_metadata", "-1"
         ];
 
@@ -114,7 +102,7 @@ class VideoScaler
                 // scale video to fit area (cropped to fit), drop sound, 24fps
                 args.AddRange([
                     "-an",
-                    "-vf", $"\"scale=(iw*sar)*max({scale.Width}/(iw*sar)\\,{scale.Height}/ih):ih*max({scale.Width}/(iw*sar)\\,{scale.Height}/ih), crop={scale.Width}:{scale.Height}\"",
+                    "-vf", $"scale=(iw*sar)*max({scale.Width}/(iw*sar)\\,{scale.Height}/ih):ih*max({scale.Width}/(iw*sar)\\,{scale.Height}/ih), crop={scale.Width}:{scale.Height}",
                     "-r", "24"
                 ]);
             }
@@ -123,7 +111,7 @@ class VideoScaler
                 args.AddRange([
                     "-c:a", "aac",
                     "-b:a", "128k",
-                    "-vf", $"\"scale='min({scale.Width},iw)':'min({scale.Height},ih)':force_original_aspect_ratio=decrease:force_divisible_by=2\""
+                    "-vf", $"scale='min({scale.Width},iw)':'min({scale.Height},ih)':force_original_aspect_ratio=decrease:force_divisible_by=2"
                 ]);
             }
         }
@@ -146,9 +134,9 @@ class VideoScaler
         args.AddRange([
             "-c:v", "libsvtav1",
             "-movflags", "+faststart",
-            $"\"{dst}\""
+            dst
         ]);
 
-        return string.Join(" ", args);
+        return args;
     }
 }

@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Text.Json;
 using CliWrap;
 using CliWrap.Buffered;
@@ -12,7 +11,8 @@ class Inspector
 
     public async Task BulkLoadSourceDimensions(string rootPath)
     {
-        var result = await Cli.Wrap("exiftool")
+        var result = await Cli
+            .Wrap("exiftool")
             .WithArguments([
                 "-j",
                 "-r",
@@ -58,35 +58,16 @@ class Inspector
             return res;
         }
 
-        var psi = new ProcessStartInfo
-        {
-            FileName = "exiftool",
-            Arguments = $"-j -ImageHeight -ImageWidth \"{path}\"",
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
-            CreateNoWindow = true
-        };
+        var process = await Cli
+            .Wrap("exiftool")
+            .WithArguments([
+                "-j",
+                "-ImageHeight",
+                "-ImageWidth",
+                path
+            ])
+            .ExecuteBufferedAsync();
 
-        using var process = new Process
-        {
-            StartInfo = psi
-        };
-
-        process.Start();
-        var data = await process.StandardOutput.ReadToEndAsync();
-        await process.WaitForExitAsync();
-
-        if (process.ExitCode != 0)
-        {
-            throw new InvalidOperationException($"exiftool exited with code: {process.ExitCode}");
-        }
-
-        if (data == null)
-        {
-            throw new InvalidDataException("Expected to get json from exiftool!");
-        }
-
-        return JsonSerializer.Deserialize<InspectResult[]>(data)!.First();
+        return JsonSerializer.Deserialize<InspectResult[]>(process.StandardOutput)!.First();
     }
 }

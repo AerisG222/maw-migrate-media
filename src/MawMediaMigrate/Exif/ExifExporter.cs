@@ -1,5 +1,6 @@
-using System.Diagnostics;
 using System.Text.Json;
+using CliWrap;
+using CliWrap.Buffered;
 using MawMediaMigrate.Results;
 
 namespace MawMediaMigrate.Exif;
@@ -35,26 +36,18 @@ class ExifExporter
 
     async Task ExportExifAsJson(FileInfo file)
     {
-        var arguments = $"-json -quiet -groupHeadings -long -textOut \"%d%f.%e.json\" \"{file.FullName}\"";
-        var psi = new ProcessStartInfo
-        {
-            FileName = "exiftool",
-            Arguments = arguments,
-            UseShellExecute = false,
-            CreateNoWindow = true
-        };
-
-        using var process = new Process { StartInfo = psi };
-
-        process.Start();
-        await process.WaitForExitAsync();
-
-        if (process.ExitCode != 0)
-        {
-            throw new InvalidOperationException(
-                $"ExifTool failed to process file {file.FullName}. Exit code: {process.ExitCode}"
-            );
-        }
+        await Cli
+            .Wrap("exiftool")
+            .WithArguments([
+                "-json",
+                "-quiet",
+                "-groupHeadings",
+                "-long",
+                "-textOut",
+                "%d%f.%e.json",
+                file.FullName
+            ])
+            .ExecuteBufferedAsync();
     }
 
     async Task FormatJson(FileInfo outfile)

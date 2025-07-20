@@ -1,4 +1,5 @@
-using System.Diagnostics;
+using CliWrap;
+using CliWrap.Buffered;
 using MawMediaMigrate.Results;
 
 namespace MawMediaMigrate.Scale;
@@ -74,30 +75,17 @@ class PhotoScaler
     {
         CreateDir(dst.DirectoryName!);
 
-        var psi = new ProcessStartInfo
-        {
-            FileName = "magick",
-            Arguments = GetImageMagickArgs(src.FullName, dst.FullName, scale),
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
-            CreateNoWindow = true
-        };
-
-        using var process = new Process
-        {
-            StartInfo = psi
-        };
-
-        process.Start();
-        await process.WaitForExitAsync();
+        await Cli
+            .Wrap("magick")
+            .WithArguments(GetImageMagickArgs(src.FullName, dst.FullName, scale))
+            .ExecuteBufferedAsync();
     }
 
     // https://usage.imagemagick.org/resize/
-    static string GetImageMagickArgs(string src, string dst, ScaleSpec scale)
+    static IEnumerable<string> GetImageMagickArgs(string src, string dst, ScaleSpec scale)
     {
         List<string> args = [
-            $"\"{src}\""
+            src
         ];
 
         if (scale.Width != int.MaxValue)
@@ -121,7 +109,7 @@ class PhotoScaler
             {
                 // the > at the end means "only scale down, not up"
                 args.AddRange([
-                    "-resize", $"\"{scale.Width}x{scale.Height}>\""
+                    "-resize", $"{scale.Width}x{scale.Height}>"
                 ]);
             }
         }
@@ -130,9 +118,9 @@ class PhotoScaler
             "-colorspace", "sRGB",
             "-quality", "72",
             "-strip",
-            $"\"{dst}\""
+            dst
         ]);
 
-        return string.Join(" ", args);
+        return args;
     }
 }
