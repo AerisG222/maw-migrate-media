@@ -74,7 +74,15 @@ class ScaleProcessor
         var origMediaRoot = new DirectoryInfo(Path.Combine(_origDir.FullName, mediaDirRootName));
         var files = origMediaRoot.EnumerateFiles("*", SearchOption.AllDirectories);
 
-        await Parallel.ForEachAsync(files, async (file, token) =>
+        // when processing highest res image to full hi res destination, we kept crashing
+        // as we ran out of mem - for a single run, it looks like 1 image can take upwards of 5gb,
+        // so set max parallelism to 10 to try and safely stay below our sys mem (currently 64gb)
+        var opts = new ParallelOptions()
+        {
+            MaxDegreeOfParallelism = 10
+        };
+
+        await Parallel.ForEachAsync(files, opts, async (file, token) =>
         {
             if (file.Directory!.Name != mediaSrcScaleName)
             {
