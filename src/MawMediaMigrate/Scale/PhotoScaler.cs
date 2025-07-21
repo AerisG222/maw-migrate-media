@@ -44,7 +44,6 @@ class PhotoScaler
                 // try to cleanup and rescale.  if this still fails, something funny is going on so log the file
                 try
                 {
-                    Console.WriteLine($"cleaning up: {dst.FullName}");
                     File.Delete(dst.FullName);
                 }
                 catch
