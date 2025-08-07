@@ -39,8 +39,8 @@
             "args": [
                 "/data/www/website_assets",
                 "/data/maw-media-assets",
-                "/home/mmorano/git/maw-migrate-media/output/dryrun",
-                "/home/mmorano/git/maw-migrate-media/output/dryrun"
+                "/home/mmorano/git/maw-migrate-media/output-migrate-media",
+                "/home/mmorano/git/maw-migrate-media/output-sql-update"
             ],
             "cwd": "${workspaceFolder}/src/MawMediaSqlUpdate",
             "console": "internalConsole",
