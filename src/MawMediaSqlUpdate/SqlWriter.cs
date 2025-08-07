@@ -235,11 +235,11 @@ class SqlWriter
             return;
         }
 
-        var path = mi.DestinationSrcPath.Replace(_destMediaDir.Parent!.FullName, string.Empty);
+        var path = mi.DestinationSrcPath.Replace(_destMediaDir.FullName, "/assets");
 
         await writer.WriteLineAsync(
             $"""
-            \set media_metadata `cat {mi.ExifFile}`
+            \set media_metadata `cat '{mi.ExifFile}'`
 
             UPDATE media.media
                 SET metadata = :'media_metadata'::jsonb
