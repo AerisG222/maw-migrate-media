@@ -19,17 +19,21 @@ public class ResultReader
         return (moveSpecs, exifResults, scaledFiles);
     }
 
-    private static async Task<IEnumerable<T>> ReadJsonFile<T>(DirectoryInfo srcDir, string fileName)
+    private static Task<IEnumerable<T>> ReadJsonFile<T>(DirectoryInfo srcDir, string fileName)
     {
         var filePath = Path.Combine(srcDir.FullName, fileName);
 
         if (!File.Exists(filePath))
         {
-            return [];
+            var res = Array.Empty<T>();
+
+            return Task.FromResult(res.AsEnumerable());
         }
 
-        var jsonContent = await File.ReadAllTextAsync(filePath);
+        using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
 
-        return JsonSerializer.Deserialize<IEnumerable<T>>(jsonContent) ?? [];
+        var data = JsonSerializer.Deserialize<IEnumerable<T>>(fs) ?? [];
+
+        return Task.FromResult(data);
     }
 }
