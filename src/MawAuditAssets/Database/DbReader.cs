@@ -32,11 +32,13 @@ public class DbReader
         var photoPaths = photos
             .SelectMany(p => new string?[] { p.LgPath, p.MdPath, p.PrtPath, p.SmPath, p.SrcPath, p.XsPath, p.XsSqPath })
             .Where(x => x != null)
+            .Where(x => !x!.Contains("/src/"))
             .Cast<string>();
 
         var videoPaths = videos
             .SelectMany(v => new string?[] { v.FullPath, v.RawPath, v.ScaledPath, v.ThumbPath, v.ThumbSqPath })
             .Where(x => x != null)
+            .Where(x => !x!.Contains("/raw/"))
             .Cast<string>();
 
         return photoPaths.Concat(videoPaths);

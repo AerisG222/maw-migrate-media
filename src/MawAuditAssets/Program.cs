@@ -57,7 +57,7 @@ static void WriteOutput(IEnumerable<string> files, string prefix)
 
 static void ShowUsage()
 {
-    Console.WriteLine("Usage: MawDbMigrate <db-conn-string> <sql-file>");
-    Console.WriteLine("  <db-conn-string> - Connection string to the database.");
-    Console.WriteLine("  <outdir> - Directory where SQL scripts should be written.");
+    Console.WriteLine("Usage: MawAuditAssets <legacy-db-conn-string> <legacy-asset-root-dir>");
+    Console.WriteLine("  <legacy-db-conn-string> - Connection string to the database.");
+    Console.WriteLine("  <legacy-asset-root-dir> - Directory where legacy asset files were written.");
 }
