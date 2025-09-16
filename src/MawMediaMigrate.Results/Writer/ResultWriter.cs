@@ -27,6 +27,11 @@ public class ResultWriter
         await WriteJson(scaledFiles, "scale.json");
     }
 
+    public async Task WriteDurationResults(IEnumerable<DurationResult> durationResults)
+    {
+        await WriteJson(durationResults, "duration.json");
+    }
+
     async Task WriteJson<T>(IEnumerable<T> items, string fileName)
     {
         var filePath = Path.Combine(_outdir.FullName, fileName);
