@@ -5,7 +5,12 @@ namespace MawMediaMigrate.Results.Reader;
 public class ResultReader
     : IResultReader
 {
-    public async Task<(IEnumerable<MoveResult> moveSpecs, IEnumerable<ExifResult> exifResults, IEnumerable<ScaleResult> scaledFiles)> ReadResults(DirectoryInfo srcDir)
+    public async Task<(
+        IEnumerable<MoveResult> moveSpecs,
+        IEnumerable<ExifResult> exifResults,
+        IEnumerable<ScaleResult> scaledFiles,
+        IEnumerable<DurationResult> durationResults
+    )> ReadResults(DirectoryInfo srcDir)
     {
         if (!srcDir.Exists)
         {
@@ -15,8 +20,9 @@ public class ResultReader
         var moveSpecs = await ReadJsonFile<MoveResult>(srcDir, "move.json");
         var exifResults = await ReadJsonFile<ExifResult>(srcDir, "exif.json");
         var scaledFiles = await ReadJsonFile<ScaleResult>(srcDir, "scale.json");
+        var durationResults = await ReadJsonFile<DurationResult>(srcDir, "duration.json");
 
-        return (moveSpecs, exifResults, scaledFiles);
+        return (moveSpecs, exifResults, scaledFiles, durationResults);
     }
 
     private static Task<IEnumerable<T>> ReadJsonFile<T>(DirectoryInfo srcDir, string fileName)

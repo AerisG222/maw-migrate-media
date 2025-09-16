@@ -18,13 +18,15 @@ class MediaRepo
     public void AssembleMediaInfo(
         IEnumerable<MoveResult> moveResults,
         IEnumerable<ExifResult> exifResults,
-        IEnumerable<ScaleResult> scaledFiles
+        IEnumerable<ScaleResult> scaledFiles,
+        IEnumerable<DurationResult> durationResults
     )
     {
         // order is important, move needs to come first as this provides the base mapping
         AddMoveInfo(moveResults);
         AddExifInfo(exifResults);
         AddScaleInfo(scaledFiles);
+        AddDuration(durationResults);
     }
 
     public IEnumerable<MediaInfo> GetMediaInfos() => _dict.Values;
@@ -44,6 +46,16 @@ class MediaRepo
             var mi = GetMediaInfo(result.Src);
 
             mi.ExifFile = result.ExifFile;
+        }
+    }
+
+    void AddDuration(IEnumerable<DurationResult> results)
+    {
+        foreach (var result in results)
+        {
+            var mi = GetMediaInfo(result.SourceFile);
+
+            mi.Duration = result.Duration;
         }
     }
 

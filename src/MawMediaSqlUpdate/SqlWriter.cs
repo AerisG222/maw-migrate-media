@@ -7,6 +7,7 @@ class SqlWriter
     const int RECORDS_PER_FILE = 10_000;
     readonly List<string> _sqlExifFiles = [];
     readonly List<string> _sqlScaleFiles = [];
+    readonly List<string> _sqlDurationFiles = [];
     readonly DirectoryInfo _outputDir;
     readonly DirectoryInfo _destMediaDir;
 
@@ -25,6 +26,32 @@ class SqlWriter
 
         await WriteSqlFiles(mediaInfos);
         await WriteRunnerScript();
+    }
+
+    async Task WriteUpdateDurations(IEnumerable<MediaInfo> mediaInfos)
+    {
+        StreamWriter? sw = null;
+        var durationFilename = Path.Combine(_outputDir.FullName, $"duration.sql");
+        _sqlDurationFiles.Add(durationFilename);
+
+        sw = new StreamWriter(durationFilename);
+
+        await WritePreamble(sw);
+
+        foreach (var mi in mediaInfos.Where(x => x.Duration != null))
+        {
+            var srcPath = mi.DestinationSrcPath.Replace(_destMediaDir.FullName, "/assets");
+
+            await sw.WriteLineAsync(
+                $"""
+                UPDATE media.media
+                    SET duration = {mi.Duration}
+                    WHERE id = (SELECT media_id FROM media.file WHERE path = '{srcPath}');
+                """
+            );
+        }
+
+        await TerminateScaleWriter(sw);
     }
 
     async Task WriteSqlFiles(IEnumerable<MediaInfo> mediaInfos)
@@ -49,6 +76,8 @@ class SqlWriter
 
             id++;
         }
+
+        await WriteUpdateDurations(mediaInfos);
 
         await TerminateExifWriter(exifWriter);
         await TerminateScaleWriter(scaleWriter);
@@ -321,6 +350,8 @@ class SqlWriter
         await WriteScripts(writer, _sqlExifFiles);
         await writer.WriteLineAsync("");
         await WriteScripts(writer, _sqlScaleFiles);
+        await writer.WriteLineAsync("");
+        await WriteScripts(writer, _sqlDurationFiles);
 
         await writer.FlushAsync();
         writer.Close();
