@@ -20,23 +20,11 @@ public class ResultWriter
         _outdir = outdir;
     }
 
-    public async Task WriteResults(IEnumerable<MoveResult> moveSpecs, IEnumerable<ExifResult> exifResults, IEnumerable<ScaleResult> scaledFiles)
+    public async Task WriteResults<T>(IEnumerable<T> results, string filename)
     {
-        await WriteJson(moveSpecs, "move.json");
-        await WriteJson(exifResults, "exif.json");
-        await WriteJson(scaledFiles, "scale.json");
-    }
-
-    public async Task WriteDurationResults(IEnumerable<DurationResult> durationResults)
-    {
-        await WriteJson(durationResults, "duration.json");
-    }
-
-    async Task WriteJson<T>(IEnumerable<T> items, string fileName)
-    {
-        var filePath = Path.Combine(_outdir.FullName, fileName);
+        var filePath = Path.Combine(_outdir.FullName, filename);
 
         await using var stream = File.Create(filePath);
-        await JsonSerializer.SerializeAsync(stream, items, _jsonOptions);
+        await JsonSerializer.SerializeAsync(stream, results, _jsonOptions);
     }
 }
