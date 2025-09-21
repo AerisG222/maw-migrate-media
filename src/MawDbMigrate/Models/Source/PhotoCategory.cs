@@ -27,8 +27,42 @@ public class PhotoCategory
     public string? TeaserPhotoSqPath { get; set; }
     public int? TeaserPhotoSqSize { get; set; }
 
-    public DateTime EffectiveDate =>
-        CreateDate != null
-            ? (DateTime) CreateDate
-            : new DateTime(Year, 1, 1).AddSeconds(Id);
+    public DateTime EffectiveDate
+    {
+        get
+        {
+            if (CreateDate == null)
+            {
+                return new DateTime(Year, 1, 1).AddSeconds(Id);
+            }
+
+            // honor the year from the source - if the year doesn't match the createdate, then
+            // we force this here for the effective date
+            if (Year > CreateDate.Value.Year)
+            {
+                return new DateTime(
+                    Year,
+                    1,
+                    CreateDate.Value.Day,
+                    CreateDate.Value.Hour,
+                    CreateDate.Value.Minute,
+                    CreateDate.Value.Second,
+                    CreateDate.Value.Millisecond);
+            }
+
+            if (Year < CreateDate.Value.Year)
+            {
+                return new DateTime(
+                    Year,
+                    12,
+                    CreateDate.Value.Day,
+                    CreateDate.Value.Hour,
+                    CreateDate.Value.Minute,
+                    CreateDate.Value.Second,
+                    CreateDate.Value.Millisecond);
+            }
+
+            return CreateDate.Value;
+        }
+    }
 }
