@@ -53,7 +53,7 @@ public class ImportFileWriter
             #!/bin/bash
             POD=$1         # dev-media-pod
             PGPORT=$2      # 5432
-            ENVPGDATA=$3   # /home/mmorano/maw/dev/media/data/pgpwd
+            ENVPGDATA=$3   # /home/mmorano/maw-media/dev/pg-pwd
 
             """);
 
@@ -272,7 +272,7 @@ public class ImportFileWriter
         Console.WriteLine($"- writing {mediaFiles.Count} media files");
         await WriteHeader(writer, $"MEDIA FILES ({mediaFiles.Count})");
 
-        foreach(var file in mediaFiles)
+        foreach (var file in mediaFiles)
         {
             await writer.WriteLineAsync(
                 $"""
@@ -504,21 +504,21 @@ public class ImportFileWriter
     }
 
     string SqlString(string? val) => val switch
-        {
-            null => "NULL",
-            "" => "NULL",
-            _ => $"'{val.Replace("'", "''")}'"
-        };
+    {
+        null => "NULL",
+        "" => "NULL",
+        _ => $"'{val.Replace("'", "''")}'"
+    };
 
     string SqlAsString<T>(T val) => val switch
-        {
-            null => "NULL",
-            _ => $"'{val}'"
-        };
+    {
+        null => "NULL",
+        _ => $"'{val}'"
+    };
 
     string SqlNonString<T>(T val) => val switch
-        {
-            null => "NULL",
-            _ => $"{val}"
-        };
+    {
+        null => "NULL",
+        _ => $"{val}"
+    };
 }
