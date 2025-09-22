@@ -18,9 +18,13 @@ public class ResultReader
         }
 
         var moveSpecs = await ReadJsonFile<MoveResult>(srcDir, "move.json");
+        var moveSpecs2 = await ReadJsonFile<MoveResult>(srcDir, "move1.json");
         var exifResults = await ReadJsonFile<ExifResult>(srcDir, "exif.json");
         var scaledFiles = await ReadJsonFile<ScaleResult>(srcDir, "scale.json");
         var durationResults = await ReadJsonFile<DurationResult>(srcDir, "duration.json");
+
+        // we processed new photos in between and resulted in a new 'move.json', so we load both and combine them here....
+        moveSpecs = moveSpecs.Concat(moveSpecs2);
 
         return (moveSpecs, exifResults, scaledFiles, durationResults);
     }

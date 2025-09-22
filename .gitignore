@@ -61,5 +61,6 @@ output-migrate-dry-run
 output-migrate-media
 output-migrate-media-backup
 output-sql-update
+output-sql-update-backup
 legacy-pg
 migration-test-pg

@@ -24,7 +24,7 @@ class MediaRepo
     {
         // order is important, move needs to come first as this provides the base mapping
         AddMoveInfo(moveResults);
-        AddExifInfo(exifResults);
+        AddExifInfo(exifResults.Where(x => !Path.GetExtension(x.Src).Equals(".json", StringComparison.OrdinalIgnoreCase)));
         AddScaleInfo(scaledFiles);
         AddDuration(durationResults);
     }

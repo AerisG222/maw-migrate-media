@@ -352,6 +352,8 @@ class SqlWriter
         await WriteScripts(writer, _sqlScaleFiles);
         await writer.WriteLineAsync("");
         await WriteScripts(writer, _sqlDurationFiles);
+        await writer.WriteLineAsync("");
+        await WriteScripts(writer, [Path.Combine(_outputDir.FullName, "cleanup.sql")]);
 
         await writer.FlushAsync();
         writer.Close();
