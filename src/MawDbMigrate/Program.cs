@@ -1,8 +1,9 @@
 ﻿using Dapper;
 using MawDbMigrate;
 
-[module:DapperAot]
+[module: DapperAot]
 DefaultTypeMap.MatchNamesWithUnderscores = true;
+SqlMapper.AddTypeHandler(new DecimalTypeHandler());
 
 if (args.Length != 2)
 {

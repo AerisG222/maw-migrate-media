@@ -307,7 +307,7 @@ public class TargetBuilder
             return string.Empty;
         }
 
-        return $"{latitude:f6},{longitude:f6}";
+        return $"{latitude:f8},{longitude:f9}";
     }
 
     bool ShouldAddLocationKeyLookup(string key) => !(string.IsNullOrEmpty(key) || _locationMap.ContainsKey(key));

@@ -8,8 +8,8 @@
             "preLaunchTask": "build",
             "program": "${workspaceFolder}/src/MawDbMigrate/bin/Debug/net9.0/MawDbMigrate",
             "args": [
-                "Server=127.0.0.1;Port=5432;Database=maw_website;Max Auto Prepare=100;User Id=svc_www_maw;Password=z2v*pKymbLXJsYt4ECR7m4w*5bg!bg",
-                "${workspaceFolder}/output"
+                "Server=localhost;Port=9898;Database=maw_website;Max Auto Prepare=100;User Id=postgres;Password=mysecretpassword",
+                "${workspaceFolder}/output-db-migrate"
             ],
             "cwd": "${workspaceFolder}/src/MawDbMigrate",
             "console": "internalConsole",
