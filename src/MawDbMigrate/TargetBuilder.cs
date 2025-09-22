@@ -65,7 +65,7 @@ public class TargetBuilder
     {
         foreach (var user in users)
         {
-            if(string.IsNullOrEmpty(user.Email))
+            if (string.IsNullOrEmpty(user.Email))
             {
                 user.Email = $"{user.Username}@example.com";
             }
@@ -416,7 +416,7 @@ public class TargetBuilder
             {
                 var targetMedia = _photoIdMap[photo.PhotoId];
 
-                targetMedia.LocationId = _locationMap[key].Id;
+                targetMedia.LocationOverrideId = _locationMap[key].Id;
             }
         }
 
@@ -428,7 +428,7 @@ public class TargetBuilder
             {
                 var targetMedia = _videoIdMap[video.VideoId];
 
-                targetMedia.LocationId = _locationMap[key].Id;
+                targetMedia.LocationOverrideId = _locationMap[key].Id;
             }
         }
 
@@ -444,7 +444,6 @@ public class TargetBuilder
                 var location = _locationMap[locationKey];
 
                 reverseGeocode.Populate(location);
-                targetMedia.LocationOverrideId = location.Id;
             }
             else
             {
@@ -454,7 +453,6 @@ public class TargetBuilder
                 var location = _locationMap[locationKey];
 
                 reverseGeocode.Populate(location);
-                targetMedia.LocationId = location.Id;
             }
         }
 
@@ -470,7 +468,6 @@ public class TargetBuilder
                 var location = _locationMap[locationKey];
 
                 reverseGeocode.Populate(location);
-                targetMedia.LocationOverrideId = location.Id;
             }
             else
             {
@@ -480,7 +477,6 @@ public class TargetBuilder
                 var location = _locationMap[locationKey];
 
                 reverseGeocode.Populate(location);
-                targetMedia.LocationId = location.Id;
             }
         }
     }
@@ -691,7 +687,8 @@ public class TargetBuilder
         IEnumerable<PhotoCategory> photoCategories,
         IEnumerable<Video> videos,
         IEnumerable<VideoCategory> videoCategories
-    ) {
+    )
+    {
         foreach (var photo in photos)
         {
             var category = photoCategories.Single(x => x.Id == photo.CategoryId);
