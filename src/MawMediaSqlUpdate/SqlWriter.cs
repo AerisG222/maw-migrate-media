@@ -111,7 +111,7 @@ class SqlWriter
                 path
             )
             SELECT
-                tmf.id,
+                MIN(tmf.id::TEXT)::uuid AS id,
                 mf.media_id,
                 mt.id AS type_id,
                 ms.id AS scale_id,
@@ -125,7 +125,15 @@ class SqlWriter
             INNER JOIN media.scale ms
                 ON ms.code = tmf.scalecode
             INNER JOIN media.type mt
-                ON mt.code = tmf.typename;
+                ON mt.code = tmf.typename
+            GROUP BY
+                mf.media_id,
+                mt.id,
+                ms.id,
+                tmf.width,
+                tmf.height,
+                tmf.bytes,
+                tmf.path;
 
             """
         );
