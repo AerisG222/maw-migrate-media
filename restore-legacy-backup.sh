@@ -14,6 +14,8 @@ if [ $? -ne 0 ]; then
         --env POSTGRES_PASSWORD=mysecretpassword \
         docker.io/library/postgres:17 \
             postgres
+
+    sleep 5
 fi
 
 echo 'starting restore'
@@ -24,6 +26,6 @@ pg_restore \
     -p 9898 \
     --create \
     --dbname postgres \
-    /home/mmorano/git/maw-migrate-media/legacy-pg/backup/maw_website.20250922.dump
+    /home/mmorano/git/maw-migrate-media/legacy-pg/backup/maw_website.20251018.dump
 
 echo 'completed restore'

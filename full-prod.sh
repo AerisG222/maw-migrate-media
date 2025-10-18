@@ -2,27 +2,27 @@
 ROOTDIR=$(pwd)
 
 # db migrate
-#echo "-- DB MIGRATE --"
-#cd src/MawDbMigrate
+echo "-- DB MIGRATE --"
+cd src/MawDbMigrate
 
-#dotnet run \
-#    "${MAW_API_Environment__DbConnectionString}" \
-#    "${ROOTDIR}/output-db-migrate/"
+dotnet run \
+   "Server=localhost;Port=9898;Database=maw_website;User ID=postgres;Password=mysecretpassword" \
+   "${ROOTDIR}/output-db-migrate/"
 
-#cd -
+cd -
 
 # migrate media
-echo "-- MIGRATE MEDIA --"
-./src/MawMediaMigrate/bin/Release/net9.0/MawMediaMigrate \
-    /data/www/website_assets \
-    /data/maw-media-assets \
-    "${ROOTDIR}/output-migrate-media/"
+# echo "-- MIGRATE MEDIA --"
+# ./src/MawMediaMigrate/bin/Release/net9.0/MawMediaMigrate \
+#     /data/www/website_assets \
+#     /data/maw-media-assets \
+#     "${ROOTDIR}/output-migrate-media/"
 
 # sql update
 #echo "-- SQL UPDATE --"
-#cd src/MawMediaSqlUpdate
+# cd src/MawMediaSqlUpdate
 
-#dotnet run \
+# dotnet run \
 #    /data/www/website_assets \
 #    /data/maw-media-assets \
 #    "${ROOTDIR}/output-migrate-media/" \
